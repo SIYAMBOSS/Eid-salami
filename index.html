@@ -26,7 +26,8 @@
         .edit-btn { background: #2980b9; color: white; flex: 1; }
         
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
-        .modal-content { background: white; margin: 30% auto; padding: 30px; width: 80%; max-width: 300px; border-radius: 25px; text-align: center; }
+        .modal-content { background: white; margin: 20% auto; padding: 25px; width: 85%; max-width: 320px; border-radius: 20px; text-align: left; }
+        textarea, input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -45,7 +46,7 @@
     </div>
 
     <div class="controls">
-        <button class="spin-btn" id="spinBtn" onclick="spinWheel()">Spin Again!</button>
+        <button class="spin-btn" id="spinBtn" onclick="spinWheel()">Spin Now!</button>
         <button class="edit-btn" onclick="openEditModal()">Edit All</button>
         <button class="share-btn" onclick="shareLink()">Share Link</button>
     </div>
@@ -55,10 +56,23 @@
 <audio id="winSound" src="https://www.myinstants.com/media/sounds/tada.mp3"></audio>
 
 <div id="customModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="text-align: center;">
         <h2 style="color: #ff4757;">🎊 অভিনন্দন!</h2>
         <p id="modalMsg" style="font-size: 22px; font-weight: bold;"></p>
-        <button onclick="closeModal('customModal')" style="background: #27ae60; color: white; width: 100%; padding: 12px; border-radius: 12px; margin-top: 10px;">OK</button>
+        <button onclick="closeModal('customModal')" style="background: #27ae60; color: white; width: 100%; padding: 12px; border-radius: 12px;">OK</button>
+    </div>
+</div>
+
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h3 style="text-align: center; margin-top: 0;">Settings</h3>
+        <label>Title:</label> <input type="text" id="editTitle">
+        <label>Caption:</label> <input type="text" id="editCaption">
+        <label>Amounts (Per Line):</label> <textarea id="editItems" rows="5"></textarea>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button onclick="updateAll()" style="background: #2980b9; color: white; flex: 1;">Update</button>
+            <button onclick="closeModal('editModal')" style="background: #ccc; flex: 1;">Cancel</button>
+        </div>
     </div>
 </div>
 
@@ -71,8 +85,8 @@
     
     let options = [];
     let isSpinning = false;
-    let wheelID = "default_v1";
     let currentRotation = 0;
+    let wheelID = "v1_global";
 
     function loadData() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -83,6 +97,7 @@
                 options = decoded.i;
                 document.getElementById('displayTitle').innerText = decoded.t;
                 document.getElementById('displayCaption').innerText = decoded.c;
+                wheelID = btoa(decoded.t).substring(0,8);
             } catch(e) { setDefault(); }
         } else { setDefault(); }
         drawWheel();
@@ -122,7 +137,6 @@
         const arcDeg = 360 / options.length;
         let targetIndex;
 
-        // রেজাল্ট সেভ করার লজিক
         const saved = localStorage.getItem("res_" + wheelID);
         if (saved !== null) {
             targetIndex = parseInt(saved);
@@ -132,7 +146,6 @@
         }
 
         const targetDeg = 360 - (targetIndex * arcDeg) - (arcDeg / 2);
-        // রিফ্রেশ ছাড়া বারবার ঘোরার জন্য currentRotation যোগ করা হয়েছে
         currentRotation += 3600 + targetDeg + (360 - (currentRotation % 360));
         canvas.style.transform = `rotate(${currentRotation}deg)`;
 
@@ -158,6 +171,24 @@
             document.getElementById('modalMsg').innerText = "আপনি পেয়েছেন: " + options[targetIndex] + " Taka";
             document.getElementById('customModal').style.display = 'block';
         }, 4000);
+    }
+
+    // Edit Functionality
+    function openEditModal() {
+        document.getElementById('editTitle').value = document.getElementById('displayTitle').innerText;
+        document.getElementById('editCaption').value = document.getElementById('displayCaption').innerText;
+        document.getElementById('editItems').value = options.join("\n");
+        document.getElementById('editModal').style.display = 'block';
+    }
+
+    function updateAll() {
+        const t = document.getElementById('editTitle').value;
+        const c = document.getElementById('editCaption').value;
+        const i = document.getElementById('editItems').value.split("\n").filter(x => x.trim() !== "");
+        
+        const data = { t, c, i };
+        const encoded = btoa(JSON.stringify(data));
+        window.location.href = window.location.origin + window.location.pathname + "?d=" + encoded;
     }
 
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
