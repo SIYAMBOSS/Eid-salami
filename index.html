@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eid Salami Wheel - Premium</title>
+    <title>Eid Salami Wheel - Premium Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --eid-gold: #ffd700; --eid-green: #00332c; }
@@ -13,12 +13,18 @@
             margin: 0; display: flex; align-items: center; justify-content: center; 
             min-height: 100vh; overflow-x: hidden;
         }
+        
         .container {
             background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px);
             padding: 30px 15px; border-radius: 40px; border: 1px solid rgba(255, 215, 0, 0.2);
             width: 92%; max-width: 400px; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
+
+        .eid-decor { font-size: 20px; color: var(--eid-gold); margin-bottom: 5px; }
+        h1 { font-size: 28px; margin: 5px 0; color: var(--eid-gold); text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+        
         .ad-box { margin: 15px 0; min-height: 60px; width: 100%; overflow: hidden; background: rgba(255,255,255,0.02); border-radius: 10px; }
+
         #wheel-container { 
             position: relative; width: 300px; height: 300px; margin: 15px auto; 
             border: 6px solid rgba(255, 215, 0, 0.1); border-radius: 50%; 
@@ -27,35 +33,53 @@
             position: absolute; top: -12px; left: 50%; transform: translateX(-50%); 
             width: 35px; z-index: 100; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); 
         }
-        /* Spin duration set to 10s */
+
+        /* 10 Seconds Spin Duration */
         canvas { width: 100%; height: 100%; border-radius: 50%; transition: transform 10s cubic-bezier(0.1, 0, 0.1, 1); }
+
+        .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; align-items: center; }
         .spin-btn { 
             background: linear-gradient(45deg, #ffd700, #b8860b); border: none; 
             color: #001a14; padding: 15px 0; width: 90%; font-size: 18px; 
-            font-weight: bold; border-radius: 50px; cursor: pointer; text-transform: uppercase;
+            font-weight: bold; border-radius: 50px; cursor: pointer; 
+            text-transform: uppercase; box-shadow: 0 5px 15px rgba(255,215,0,0.3); 
         }
-        .share-btn { background: transparent; border: 1px solid rgba(255, 215, 0, 0.4); color: var(--eid-gold); padding: 8px 25px; border-radius: 50px; cursor: pointer; margin-top: 15px; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
-        .modal-content { background: #002b24; margin: 45% auto; padding: 35px 20px; width: 75%; border-radius: 30px; border: 2px solid var(--eid-gold); text-align: center; }
+        .share-btn { 
+            background: transparent; border: 1px solid rgba(255, 215, 0, 0.4); 
+            color: var(--eid-gold); padding: 8px 25px; border-radius: 50px; 
+            cursor: pointer; font-size: 13px; text-decoration: none;
+        }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); }
+        .modal-content { 
+            background: #002b24; margin: 45% auto; padding: 35px 20px; 
+            width: 75%; max-width: 280px; border-radius: 30px; 
+            border: 2px solid var(--eid-gold); text-align: center;
+        }
         #youtube-player { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <div class="eid-decor">🌙 ⭐</div>
+    <h1>Eid Salami ✨</h1>
+
     <div class="ad-box">
         <script src="https://pl28946683.profitablecpmratenetwork.com/92/58/98/92589880168239af1cbf84c383df5558.js"></script>
     </div>
 
-    <h1>Eid Salami ✨</h1>
+    <p style="font-size: 14px; color: #bdc3c7;">সালামি নিতে চাকাটি ঘুরান 🥰</p>
 
     <div id="wheel-container">
         <img src="https://cdn-icons-png.flaticon.com/512/8213/8213522.png" class="pointer" alt="pointer">
         <canvas id="canvas" width="600" height="600"></canvas>
     </div>
 
-    <button class="spin-btn" id="spinBtn" onclick="spinWheel()">Spin Now</button>
-    <button class="share-btn" onclick="shareLink()">🔗 Share with Friends</button>
+    <div class="btn-group">
+        <button class="spin-btn" id="spinBtn" onclick="spinWheel()">Spin Now</button>
+        <button class="share-btn" onclick="shareLink()">🔗 Share with Friends</button>
+    </div>
 
     <div class="ad-box">
         <script src="https://pl28946683.profitablecpmratenetwork.com/92/58/98/92589880168239af1cbf84c383df5558.js"></script>
@@ -64,13 +88,17 @@
 
 <div id="winModal" class="modal">
     <div class="modal-content">
-        <h2 style="color: var(--eid-gold);">ঈদ মোবারক! 🌙</h2>
-        <p id="modalMsg" style="font-size: 32px; font-weight: bold; color: var(--eid-gold);"></p>
-        <button onclick="closeModal()" style="background: var(--eid-gold); padding: 10px 30px; border-radius: 10px; border: none; font-weight: bold;">আলহামদুলিল্লাহ</button>
+        <h2 style="color: var(--eid-gold); margin: 0;">ঈদ মোবারক! 🌙</h2>
+        <div style="font-size: 40px; margin: 15px 0;">💌</div>
+        <p style="color: #eee; margin: 0;">আপনার ঈদ সালামি:</p>
+        <p id="modalMsg" style="font-size: 32px; font-weight: bold; color: var(--eid-gold); margin: 10px 0;"></p>
+        <button onclick="closeModal()" style="background: var(--eid-gold); color: #001a14; border: none; padding: 12px 0; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer;">আলহামদুলিল্লাহ</button>
     </div>
 </div>
 
 <div id="youtube-player"></div>
+
+<audio id="tickSound" src="https://www.soundjay.com/buttons/button-29.mp3"></audio>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
@@ -79,12 +107,19 @@
         player = new YT.Player('youtube-player', {
             height: '0', width: '0',
             videoId: 'PTSbiHMpRtE',
-            playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'PTSbiHMpRtE' }
+            playerVars: { 
+                'autoplay': 0, 
+                'loop': 1, 
+                'playlist': 'PTSbiHMpRtE' 
+            }
         });
     }
 
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
+    const tickSound = document.getElementById('tickSound');
+    
+    // Price range 5 to 15, and one 1 TK box
     const options = ["5 TK", "6 TK", "7 TK", "8 TK", "9 TK", "10 TK", "11 TK", "12 TK", "13 TK", "14 TK", "15 TK", "1 TK"];
     const colors = ["#006266", "#1e272e", "#009432", "#2d3436", "#006266", "#1e272e", "#009432", "#2d3436", "#006266", "#1e272e", "#009432", "#eb4d4b"];
 
@@ -93,11 +128,13 @@
 
     function drawWheel() {
         const arc = (2 * Math.PI) / options.length;
+        ctx.clearRect(0,0,600,600);
         ctx.translate(300, 300);
         for(let i = 0; i < options.length; i++) {
             const angle = i * arc;
             ctx.fillStyle = colors[i % colors.length];
             ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 290, angle, angle + arc); ctx.fill();
+            ctx.strokeStyle = "rgba(255,215,0,0.2)"; ctx.lineWidth = 2; ctx.stroke();
             ctx.save();
             ctx.fillStyle = "#ffd700"; ctx.font = "bold 22px Arial"; ctx.rotate(angle + arc/2);
             ctx.textAlign = "right"; ctx.fillText(options[i], 250, 10);
@@ -110,31 +147,37 @@
         isSpinning = true;
         document.getElementById('spinBtn').disabled = true;
 
-        // Start Sound on Click (Permission granted by user action)
+        // Sound Permission on Click
         if(player && player.playVideo) { player.playVideo(); }
 
         const sliceDeg = 360 / options.length;
         const winIdx = options.length - 1; // Always 1 TK
         const stopDeg = (360 - (winIdx * sliceDeg)) - (sliceDeg / 2);
         
+        // 10s Spin Physics
         currentRotation += (360 * 15) + stopDeg + (360 - (currentRotation % 360));
         canvas.style.transform = `rotate(${currentRotation + 270}deg)`; 
 
-        // Duration set to 10 seconds
         setTimeout(() => {
             isSpinning = false;
             document.getElementById('spinBtn').disabled = false;
             document.getElementById('modalMsg').innerText = options[winIdx];
             document.getElementById('winModal').style.display = 'block';
-        }, 10000);
+        }, 10000); // 10s delay
     }
 
     function closeModal() { document.getElementById('winModal').style.display = 'none'; }
+
     function shareLink() {
         const fixedUrl = "https://eid-salami-eta.vercel.app/";
-        if (navigator.share) { navigator.share({ title: 'Eid Salami', url: fixedUrl }); }
-        else { navigator.clipboard.writeText(fixedUrl); alert("Link Copied!"); }
+        if (navigator.share) {
+            navigator.share({ title: 'Eid Salami Wheel', url: fixedUrl });
+        } else {
+            navigator.clipboard.writeText(fixedUrl);
+            alert("লিঙ্ক কপি হয়েছে!");
+        }
     }
+    
     drawWheel();
 </script>
 </body>
