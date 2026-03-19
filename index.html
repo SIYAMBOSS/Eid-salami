@@ -5,44 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salami Wheel</title>
     <style>
-        body { text-align: center; font-family: 'Arial', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        /* ব্যাকগ্রাউন্ড এখন ইমেজের বদলে ক্লিন কালার গ্রেডিয়েন্ট */
+        body { text-align: center; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; padding: 15px; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { max-width: 450px; width: 100%; background: white; padding: 25px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
         
-        /* গ্লোবাল কাউন্টার ও নোটিফিকেশন স্টাইল */
-        .live-count { background: #6c5ce7; color: white; padding: 6px 18px; border-radius: 25px; font-size: 14px; font-weight: bold; display: inline-block; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3); transition: 0.3s; }
-        .live-count span { color: #ffeaa7; font-size: 16px; }
+        /* অটো-ইনক্রিমেন্ট কাউন্টার স্টাইল */
+        .live-count { background: #ff4757; color: white; padding: 8px 20px; border-radius: 30px; font-size: 14px; font-weight: bold; display: inline-block; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4); }
+        .live-count span { color: #fff; font-size: 16px; border-bottom: 2px solid #ffeaa7; }
 
+        /* চাকার কন্টেইনারে এখন শুধু কালার */
         #canvasContainer { 
-            position: relative; display: inline-block; border-radius: 50%; width: 350px; height: 350px;
-            /* আপনার দেওয়া পরিষ্কার লণ্ঠন ব্যাকগ্রাউন্ড সেট করা হয়েছে */
-            background: #2d3436 url('https://i.ibb.co/3mN98Cg/lantern-bg.jpg') center/cover;
-            border: 10px solid #fff; box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            position: relative; display: inline-block; border-radius: 50%; width: 320px; height: 320px;
+            background: #f1f2f6; border: 8px solid #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.1); overflow: hidden;
         }
         #canvas { width: 100%; height: 100%; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
-        .pointer { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #ff4757; position: absolute; left: 50%; transform: translateX(-50%); z-index: 20; top: -10px; }
+        .pointer { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #2f3542; position: absolute; left: 50%; transform: translateX(-50%); z-index: 20; top: -5px; }
         
-        .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
-        button { padding: 12px 20px; font-size: 16px; cursor: pointer; border: none; border-radius: 10px; transition: 0.3s; font-weight: bold; }
-        .spin-btn { background: #ff4757; color: white; width: 100%; margin-bottom: 5px; box-shadow: 0 4px #e74c3c; }
-        .spin-btn:active { box-shadow: none; transform: translateY(4px); }
+        .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 25px; }
+        button { padding: 12px 20px; font-size: 15px; cursor: pointer; border: none; border-radius: 12px; transition: 0.2s; font-weight: bold; }
+        .spin-btn { background: #ff4757; color: white; width: 100%; margin-bottom: 5px; box-shadow: 0 5px #c0392b; text-transform: uppercase; letter-spacing: 1px; }
+        .spin-btn:active { box-shadow: none; transform: translateY(5px); }
         .share-btn { background: #2ed573; color: white; flex: 1; }
         .edit-btn { background: #1e90ff; color: white; flex: 1; }
         
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
-        .modal-content { background: white; margin: 15% auto; padding: 25px; width: 85%; max-width: 350px; border-radius: 20px; text-align: left; }
-        textarea { width: 100%; height: 100px; margin: 10px 0; padding: 10px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; resize: none; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        /* মোডাল স্টাইল */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); }
+        .modal-content { background: white; margin: 20% auto; padding: 30px; width: 80%; max-width: 320px; border-radius: 25px; text-align: center; border: 4px solid #ff4757; }
+        textarea, input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="liveCount" class="live-count">🌍 Total Spins Across All Wheels: <span id="viewCount">Loading...</span></div>
+    <div id="liveCountBox" class="live-count">🌍 Total Spins: <span id="viewCount">1,240</span></div>
     
-    <h1 id="displayTitle" style="font-size: 24px; margin: 5px 0 10px;">Salami Wheel..!! 🖤</h1>
-    <p id="displayCaption" style="margin-top: 0; color: #666;">আপনার সালামি বুঝে নিন 🥰</p>
+    <h1 id="displayTitle" style="font-size: 26px; margin: 5px 0 5px; color: #2f3542;">Salami Wheel..!! 🖤</h1>
+    <p id="displayCaption" style="margin-top: 0; color: #747d8c; font-weight: 500;">আপনার সালামি বুঝে নিন 🥰</p>
     
-    <div style="position: relative; display: inline-block;">
+    <div style="position: relative; display: inline-block; margin-top: 10px;">
         <div class="pointer"></div>
         <div id="canvasContainer">
             <canvas id="canvas" width="500" height="500"></canvas>
@@ -60,19 +60,19 @@
 <audio id="winSound" src="https://www.myinstants.com/media/sounds/tada.mp3"></audio>
 
 <div id="customModal" class="modal">
-    <div class="modal-content" style="text-align: center;">
-        <h2 id="modalTitle">🎉 অভিনন্দন!</h2>
-        <p id="modalMsg" style="font-size: 18px;"></p>
-        <button onclick="closeModal('customModal')" style="background: #ff4757; color: white; width: 100%; padding: 12px; border-radius: 10px;">OK</button>
+    <div class="modal-content">
+        <h2 id="modalTitle" style="color: #ff4757; margin-top: 0;">🎊 অভিনন্দন!</h2>
+        <p id="modalMsg" style="font-size: 20px; font-weight: bold; color: #2f3542;"></p>
+        <button onclick="closeModal('customModal')" style="background: #2ed573; color: white; width: 100%; padding: 12px; border-radius: 12px; margin-top: 10px;">সংগ্রহ করুন</button>
     </div>
 </div>
 
 <div id="editModal" class="modal">
-    <div class="modal-content">
-        <h3 style="text-align: center; margin: 0;">Settings</h3>
+    <div class="modal-content" style="text-align: left;">
+        <h3 style="text-align: center; margin-top: 0;">Settings</h3>
         <label>Title:</label> <input type="text" id="editTitle">
         <label>Caption:</label> <input type="text" id="editCaption">
-        <label>Items (Only Numbers, Per Line):</label> <textarea id="salamiItems" placeholder="5&#10;10&#10;..."></textarea>
+        <label>Items (Per Line):</label> <textarea id="salamiItems" rows="5"></textarea>
         <div style="display: flex; gap: 10px;">
             <button onclick="updateAll()" style="background: #1e90ff; color: white; flex: 1;">Update</button>
             <button onclick="closeModal('editModal')" style="background: #ccc; flex: 1;">Cancel</button>
@@ -85,13 +85,15 @@
     const ctx = canvas.getContext('2d');
     const tickSound = document.getElementById('tickSound');
     const winSound = document.getElementById('winSound');
-    const colors = ["rgba(255, 89, 94, 0.8)", "rgba(255, 202, 58, 0.8)", "rgba(138, 201, 38, 0.8)", "rgba(25, 130, 196, 0.8)", "rgba(106, 76, 147, 0.8)", "rgba(247, 37, 133, 0.8)"];
+    // কালার প্যালেট - ইমেজের বদলে এখন ব্রাইট কালার ব্যবহার করা হয়েছে
+    const colors = ["#ff9f43", "#ee5253", "#1dd1a1", "#54a0ff", "#5f27cd", "#f368e0", "#ff6b6b", "#48dbfb"];
     
     let options = [];
     let isSpinning = false;
     let wheelID = "";
+    let currentViews = 1240;
 
-    async function loadData() {
+    function loadData() {
         const urlParams = new URLSearchParams(window.location.search);
         const encodedData = urlParams.get('d');
         
@@ -101,65 +103,39 @@
                 options = decoded.i;
                 document.getElementById('displayTitle').innerText = decoded.t;
                 document.getElementById('displayCaption').innerText = decoded.c;
-                wheelID = btoa(encodedData).substring(0, 12).replace(/[^a-zA-Z]/g, "x");
+                wheelID = btoa(encodedData).substring(0, 10).replace(/[^a-zA-Z]/g, "x");
             } catch(e) { setDefault(); }
         } else { setDefault(); }
         
         drawWheel();
-        getTotalGlobalViews(); // গ্লোবাল কাউন্টার কল করা
+        initViewCounter();
     }
 
     function setDefault() {
-        // ডিফল্ট চাকাতে 50 TK এবং 100 TK ঘর রাখা হয়েছে
-        options = ["5", "10", "2", "5", "1", "5", "1", "20", "50", "100", "5", "10"];
-        wheelID = "siyam_main_default";
+        options = ["5", "10", "2", "5", "1", "20", "50", "100", "5", "10", "1", "2"];
+        wheelID = "default_wheel";
     }
 
-    function getTotalGlobalViews() {
-        const namespace = "siyam_salami_app_global";
-        const key = "total_combined_views_v1";
-        
-        // যদি আগে থেকে রেজাল্ট সেভ থাকে, তবে নোটিফিকেশন বারটি বদলে যাবে
+    // ভিউ কাউন্টার লজিক - ১-১ করে বাড়তে থাকবে
+    function initViewCounter() {
+        // আগেই জিতে থাকলে মেসেজ আপডেট
         const savedIdx = localStorage.getItem("res_" + wheelID);
         if (savedIdx !== null) {
-            options = loadSavedOptions() || options; // ডাটা লোড করা
-            const resultValue = options[parseInt(savedIdx)];
-            
-            const liveCountObj = document.getElementById('liveCount');
-            liveCountObj.innerHTML = `💸 আপনি আগেই 💸 <span>${resultValue} TK</span> পেয়েছেন`;
-            liveCountObj.style.background = '#ff4757'; // কালার বদলে নোটিফিকেশন
-            
-            // টোটাল কাউন্ট পেতে হলেও তো একবার API কল করতে হবে, না হলে ডাটা বাসি থেকে যাবে
-            fetch(`https://api.countapi.xyz/get/${namespace}/${key}`)
-                .then(res => res.json())
-                .then(data => {
-                    // এটি শুধু গেট ডাটা করবে, হিট করবে না
-                })
-                .catch(()=>{});
+            const savedOpts = loadSavedOptions() || options;
+            document.getElementById('liveCountBox').innerHTML = `💸 আপনি আগেই 💸 <span>${savedOpts[savedIdx]} TK</span> পেয়েছেন`;
+            document.getElementById('liveCountBox').style.background = "#2f3542";
         } else {
-            // যদি আগে থেকে রেজাল্ট না থাকে, তবে গ্লোবাল কাউন্টার হিট করবে
-            fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('viewCount').innerText = data.value;
-                })
-                .catch(() => {
-                    document.getElementById('viewCount').innerText = "1,240+"; // এরর হলে একটি বড় নাম্বার
-                });
+            // কেউ লিঙ্কে থাকলেও ভিউ অটোমেটিক বাড়বে
+            setInterval(() => {
+                currentViews += Math.floor(Math.random() * 3) + 1;
+                document.getElementById('viewCount').innerText = currentViews.toLocaleString();
+            }, 3000);
         }
     }
 
-    // localStorage থেকে ডাটা লোড করার ফাংশন (বারবার একই রেজাল্ট নিশ্চিত করতে)
     function loadSavedOptions() {
         const encoded = localStorage.getItem("opt_" + wheelID);
-        if (encoded) {
-            try { return JSON.parse(atob(encoded)); } catch(e) { return null; }
-        } return null;
-    }
-
-    // localStorage এ ডাটা সেভ করার ফাংশন
-    function saveOptions() {
-        localStorage.setItem("opt_" + wheelID, btoa(JSON.stringify(options)));
+        return encoded ? JSON.parse(atob(encoded)) : null;
     }
 
     function drawWheel() {
@@ -169,16 +145,11 @@
         for(let i = 0; i < numOptions; i++) {
             const angle = i * arc;
             ctx.fillStyle = colors[i % colors.length];
-            // 50 TK এবং 100 TK ঘরগুলোকে আলাদা করার জন্য কোনো স্পেশাল কালার দিতে চাইলে এখানে দিতে পারেন
-            if (options[i] === "50" || options[i] === "100") {
-                // ctx.fillStyle = "black"; // চাইল্ডিস লাগতে পারে, তাই আমি ডিফল্ট কালারেই রেখেছি
-            }
-            
             ctx.beginPath(); ctx.moveTo(250, 250);
             ctx.arc(250, 250, 250, angle, angle + arc, false); ctx.fill();
-            ctx.save(); ctx.fillStyle = "white"; ctx.font = "bold 22px Arial";
+            ctx.save(); ctx.fillStyle = "white"; ctx.font = "bold 24px Arial";
             ctx.translate(250, 250); ctx.rotate(angle + arc/2);
-            ctx.fillText(options[i] + " TK", 110, 10); ctx.restore();
+            ctx.fillText(options[i] + " TK", 100, 10); ctx.restore();
         }
     }
 
@@ -192,36 +163,24 @@
         const arcDeg = 360 / numOptions;
         let targetIndex;
 
-        // চেক করা হচ্ছে আগে স্পিন করেছে কি না
         const savedResult = localStorage.getItem("res_" + wheelID);
         if (savedResult !== null) {
             targetIndex = parseInt(savedResult);
         } else {
-            // ৫. কালো ঘর (50, 100) এড়ানোর লজিক
-            // কালো ঘর ছাড়া সব ঘরকে একটি টেম্পোরারি লিস্টে নিয়ে র‍্যান্ডম স্পিন
-            let fairOptions = [];
+            // ৫০ এবং ১০০ টাকা বাদ দিয়ে র‍্যান্ডম রেজাল্ট
+            let available = [];
             for (let i = 0; i < numOptions; i++) {
-                if (options[i] !== "50" && options[i] !== "100") {
-                    fairOptions.push(i);
-                }
+                if (options[i] !== "50" && options[i] !== "100") available.push(i);
             }
-            
-            if (fairOptions.length > 0) {
-                targetIndex = fairOptions[Math.floor(Math.random() * fairOptions.length)];
-            } else {
-                targetIndex = Math.floor(Math.random() * numOptions); // ব্যাকআপ লজিক (ভুল করে সব ঘর কালো হলে)
-            }
-            
-            localStorage.setItem("res_" + wheelID, targetIndex); // রেজাল্ট সেভ করে রাখা
-            saveOptions(); // ডাটাও সেভ করে রাখা যাতে পরে লোড করা যায়
+            targetIndex = available[Math.floor(Math.random() * available.length)];
+            localStorage.setItem("res_" + wheelID, targetIndex);
+            localStorage.setItem("opt_" + wheelID, btoa(JSON.stringify(options)));
         }
 
-        // ক্যালকুলেশন যাতে ওই একই ঘরে থামে
         const targetDeg = 360 - (targetIndex * arcDeg) - (arcDeg / 2);
         const extraDegrees = 3600 + targetDeg + 90;
         canvas.style.transform = `rotate(${extraDegrees}deg)`;
 
-        // টিক সাউন্ড লজিক
         let lastIdx = -1;
         const tickCheck = setInterval(() => {
             const style = window.getComputedStyle(canvas);
@@ -241,8 +200,18 @@
             isSpinning = false;
             document.getElementById('spinBtn').disabled = false;
             winSound.play().catch(() => {});
-            showPopup("🎊 অভিনন্দন!", "আপনি পেয়েছেন: " + options[targetIndex] + " Taka");
+            document.getElementById('modalMsg').innerText = "আপনি পেয়েছেন: " + options[targetIndex] + " Taka";
+            document.getElementById('customModal').style.display = 'block';
         }, 4000);
+    }
+
+    function shareLink() {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            alert("লিঙ্ক কপি হয়েছে! এখন বন্ধুদের পাঠান।");
+        }).catch(() => {
+            prompt("লিঙ্কটি কপি করুন:", url);
+        });
     }
 
     function updateAll() {
@@ -253,12 +222,6 @@
         };
         const encoded = btoa(JSON.stringify(data));
         window.location.href = window.location.pathname + "?d=" + encoded;
-    }
-
-    function shareLink() {
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            showPopup("Link Copied!", "এই ছোট লিঙ্কটি বন্ধুদের পাঠান।");
-        });
     }
 
     function openEditModal() {
