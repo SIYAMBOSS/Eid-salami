@@ -7,7 +7,7 @@
     <style>
         body { text-align: center; font-family: 'Arial', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        #canvas { margin: 20px 0; border-radius: 50%; max-width: 100%; height: auto; border: 4px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        #canvas { margin: 20px 0; border-radius: 50%; max-width: 100%; height: auto; border: 5px solid #fff; box-shadow: 0 0 15px rgba(0,0,0,0.1); transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
         .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
         button { padding: 12px 20px; font-size: 16px; cursor: pointer; border: none; border-radius: 8px; transition: 0.3s; font-weight: bold; }
         .spin-btn { background: #ff4757; color: white; width: 100%; margin-bottom: 10px; }
@@ -25,8 +25,8 @@
 <body>
 
 <div class="container">
-    <h1 id="displayTitle" style="margin-bottom: 5px; cursor: pointer;">Salami Wheel..!! 🖤</h1>
-    <p id="displayCaption" style="margin-top: 0; cursor: pointer;">Pick your EID salami..!! 🥰</p>
+    <h1 id="displayTitle" style="margin-bottom: 5px;">Salami Wheel..!! 🖤</h1>
+    <p id="displayCaption" style="margin-top: 0;">Pick your EID salami..!! 🥰</p>
     
     <div style="position: relative; display: inline-block;">
         <div class="pointer"></div>
@@ -42,7 +42,7 @@
 
 <div id="customModal" class="modal">
     <div class="modal-content" style="text-align: center;">
-        <h2 id="modalTitle">🎉 অভিনন্দন!</h2>
+        <h2 id="modalTitle"></h2>
         <p id="modalMsg"></p>
         <button onclick="closeModal('customModal')" style="background: #ff4757; color: white; width: 100%; padding: 10px; border-radius: 8px;">OK</button>
     </div>
@@ -51,17 +51,12 @@
 <div id="editModal" class="modal">
     <div class="modal-content">
         <h3 style="text-align: center;">সেটিংস এডিট করুন</h3>
-        
         <label>টাইটেল:</label>
         <input type="text" id="editTitle">
-        
         <label>ক্যাপশন:</label>
         <input type="text" id="editCaption">
-        
-        <label>সালামির লিস্ট (শুধু সংখ্যা লিখুন):</label>
-        <p style="font-size: 11px; color: #888; margin: 0;">প্রতি লাইনে একটি করে (উদা: 50)</p>
+        <label>সালামির লিস্ট (প্রতি লাইনে একটি):</label>
         <textarea id="salamiItems"></textarea>
-        
         <div style="display: flex; gap: 10px;">
             <button onclick="updateAll()" style="background: #1e90ff; color: white; flex: 1;">Update</button>
             <button onclick="closeModal('editModal')" style="background: #ccc; flex: 1;">Cancel</button>
@@ -86,11 +81,7 @@
         currentTitle = urlParams.get('t') || "Salami Wheel..!! 🖤";
         currentCaption = urlParams.get('c') || "Pick your EID salami..!! 🥰";
         
-        if (itemsData) {
-            options = itemsData.split(',').map(decodeURIComponent);
-        } else {
-            options = ["10", "50", "100", "5", "20", "500", "10", "1000"];
-        }
+        options = itemsData ? itemsData.split(',').map(decodeURIComponent) : ["10", "50", "100", "5", "20", "500", "10", "1000"];
         
         document.getElementById('displayTitle').innerText = currentTitle;
         document.getElementById('displayCaption').innerText = currentCaption;
@@ -98,30 +89,34 @@
     }
 
     function drawWheel() {
-        ctx.clearRect(0,0,500,500);
         const numOptions = options.length;
         const arc = (2 * Math.PI) / numOptions;
-        
-        // ফন্ট সাইজ কন্ট্রোল
-        let fontSize = numOptions > 15 ? "12px" : numOptions > 10 ? "14px" : "16px";
+        ctx.clearRect(0,0,500,500);
 
         for(let i = 0; i < numOptions; i++) {
             const angle = startAngle + i * arc;
+            
+            // স্লাইস আঁকা
             ctx.fillStyle = colors[i % colors.length];
             ctx.beginPath();
             ctx.moveTo(250, 250);
             ctx.arc(250, 250, 240, angle, angle + arc, false);
             ctx.fill();
-            
+            ctx.stroke();
+
+            // লেখা আঁকা (লম্বালম্বি/Radial)
             ctx.save();
             ctx.fillStyle = "white";
-            ctx.font = `bold ${fontSize} Arial`;
-            ctx.translate(250 + Math.cos(angle + arc / 2) * 160, 250 + Math.sin(angle + arc / 2) * 160);
-            ctx.rotate(angle + arc / 2 + Math.PI / 2);
+            ctx.font = "bold 16px Arial";
             
-            // অটো 'Taka' যোগ করা
+            // কেন্দ্রবিন্দুতে সরিয়ে নেওয়া
+            ctx.translate(250, 250);
+            // স্লাইসের মাঝখানের এঙ্গেলে রোটেট করা
+            ctx.rotate(angle + arc / 2);
+            
+            // লেখাকে লম্বালম্বিভাবে সেট করা
             const text = options[i] + " Taka";
-            ctx.fillText(text, -ctx.measureText(text).width / 2, 0);
+            ctx.fillText(text, 70, 5); // কেন্দ্র থেকে ৭০ পিক্সেল দূরে শুরু হবে
             ctx.restore();
         }
     }
@@ -131,65 +126,51 @@
         isSpinning = true;
         document.getElementById('spinBtn').disabled = true;
 
-        const spinDuration = 4000;
         const extraDegrees = Math.floor(Math.random() * 360) + 3600; 
-        const canvasObj = document.getElementById('canvas');
-        
-        canvasObj.style.transition = `transform ${spinDuration}ms cubic-bezier(0.15, 0, 0.15, 1)`;
-        canvasObj.style.transform = `rotate(${extraDegrees}deg)`;
+        canvas.style.transform = `rotate(${extraDegrees}deg)`;
 
         setTimeout(() => {
             isSpinning = false;
             document.getElementById('spinBtn').disabled = false;
-            
             const actualDeg = extraDegrees % 360;
             const numOptions = options.length;
-            const arcDeg = 360 / numOptions;
-            const index = Math.floor((360 - (actualDeg - 90) % 360) % 360 / arcDeg);
+            const index = Math.floor((360 - (actualDeg - 90) % 360) % 360 / (360 / numOptions));
             
             showPopup("🎉 ঈদ মোবারক!", "আপনি পেয়েছেন: " + options[index] + " Taka");
-            
-            canvasObj.style.transition = 'none';
-            canvasObj.style.transform = `rotate(${actualDeg}deg)`;
-        }, spinDuration);
+            canvas.style.transition = 'none';
+            canvas.style.transform = `rotate(${actualDeg}deg)`;
+            setTimeout(() => canvas.style.transition = 'transform 4s cubic-bezier(0.15, 0, 0.15, 1)', 50);
+        }, 4000);
     }
 
     function updateAll() {
         const newTitle = document.getElementById('editTitle').value || "Salami Wheel..!! 🖤";
         const newCaption = document.getElementById('editCaption').value || "Pick your EID salami..!! 🥰";
-        const text = document.getElementById('salamiItems').value;
-        const newOptions = text.split("\n").map(item => item.trim()).filter(item => item !== "");
+        const newOptions = document.getElementById('salamiItems').value.split("\n").map(s => s.trim()).filter(s => s !== "");
         
-        if(newOptions.length < 2) {
-            alert("কমপক্ষে ২টি ঘর থাকতে হবে!");
-            return;
-        }
+        if(newOptions.length < 2) return alert("কমপক্ষে ২টি ঘর দিন!");
 
-        const encodedItems = newOptions.map(encodeURIComponent).join(',');
-        const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?items=${encodedItems}&t=${encodeURIComponent(newTitle)}&c=${encodeURIComponent(newCaption)}`;
+        const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?items=${newOptions.map(encodeURIComponent).join(',')}&t=${encodeURIComponent(newTitle)}&c=${encodeURIComponent(newCaption)}`;
         window.history.pushState({path:newUrl},'',newUrl);
         
         options = newOptions;
         currentTitle = newTitle;
         currentCaption = newCaption;
-        
         document.getElementById('displayTitle').innerText = currentTitle;
         document.getElementById('displayCaption').innerText = currentCaption;
-        
         drawWheel();
         closeModal('editModal');
     }
 
-    function showPopup(title, msg) {
-        document.getElementById('modalTitle').innerText = title;
-        document.getElementById('modalMsg').innerText = msg;
+    function showPopup(t, m) {
+        document.getElementById('modalTitle').innerText = t;
+        document.getElementById('modalMsg').innerText = m;
         document.getElementById('customModal').style.display = 'block';
     }
 
     function shareLink() {
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            showPopup("লিঙ্ক কপি হয়েছে!", "আপনার বন্ধুদের পাঠিয়ে দিন। তারা আপনার সেট করা সালামি এবং ক্যাপশন দেখতে পাবে।");
-        });
+        navigator.clipboard.writeText(window.location.href);
+        showPopup("লিঙ্ক কপি হয়েছে!", "বন্ধুদের পাঠিয়ে দিন।");
     }
 
     function openEditModal() {
@@ -199,10 +180,7 @@
         document.getElementById('editModal').style.display = 'block';
     }
 
-    function closeModal(id) {
-        document.getElementById(id).style.display = 'none';
-    }
-
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     window.onload = loadData;
 </script>
 
