@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salami Wheel - Spin & Create</title>
     <style>
-        body { text-align: center; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); margin: 0; padding: 15px; min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #333; }
-        .container { max-width: 420px; width: 100%; background: #ffffff; padding: 25px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); position: relative; }
+        body { text-align: center; font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); margin: 0; padding: 15px; min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #333; }
+        .container { max-width: 420px; width: 100%; background: #ffffff; padding: 25px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
         
         .live-count { background: #eb4d4b; color: white; padding: 8px 20px; border-radius: 50px; font-size: 14px; font-weight: bold; display: inline-block; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(235, 77, 75, 0.4); }
         .live-count span { color: #f9ca24; font-size: 16px; }
@@ -25,11 +25,9 @@
         .share-btn { background: #27ae60; color: white; flex: 1; }
         .create-nav-btn { background: #f9ca24; color: #333; flex: 1; }
         
-        /* Modal & Form */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
         .modal-content { background: white; margin: 15% auto; padding: 25px; width: 85%; max-width: 320px; border-radius: 25px; text-align: left; }
         textarea, input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
-        
         .win-modal-content { text-align: center; }
     </style>
 </head>
@@ -72,14 +70,14 @@
     <div class="modal-content">
         <h3 style="text-align: center; margin-top: 0;">Create Your Own Wheel</h3>
         <label>Title:</label>
-        <input type="text" id="formTitle" placeholder="Siam's Salami">
+        <input type="text" id="formTitle" placeholder="Ex: Siam's Salami">
         <label>Caption:</label>
         <input type="text" id="formCaption" placeholder="সালামি নিয়ে যাও!">
         <label>Amounts (Per Line):</label>
         <textarea id="formItems" rows="4" placeholder="10&#10;20&#10;50&#10;100"></textarea>
         <div style="display: flex; gap: 10px;">
-            <button onclick="generateLink()" style="background: #ff4757; color: white; flex: 2;">Generate Link</button>
-            <button onclick="closeModal('createModal')" style="background: #ccc; flex: 1;">Cancel</button>
+            <button type="button" onclick="generateLink()" style="background: #ff4757; color: white; flex: 2; height: 50px;">Generate Link</button>
+            <button type="button" onclick="closeModal('createModal')" style="background: #ccc; flex: 1;">Cancel</button>
         </div>
     </div>
 </div>
@@ -94,7 +92,7 @@
     let options = [];
     let isSpinning = false;
     let currentRotation = 0;
-    let wheelID = "v1_global";
+    let wheelID = "";
 
     function loadData() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -105,7 +103,7 @@
                 options = decoded.i;
                 document.getElementById('displayTitle').innerText = decoded.t;
                 document.getElementById('displayCaption').innerText = decoded.c;
-                wheelID = btoa(decoded.t).substring(0,8);
+                wheelID = btoa(decoded.t + decoded.i[0]).substring(0,12); // Unique ID based on data
             } catch(e) { setDefault(); }
         } else { setDefault(); }
         drawWheel();
@@ -148,7 +146,6 @@
         if (isSpinning) return;
         isSpinning = true;
         document.getElementById('spinBtn').disabled = true;
-
         const arcDeg = 360 / options.length;
         let targetIndex;
 
@@ -192,17 +189,27 @@
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     function generateLink() {
-        const t = document.getElementById('formTitle').value || "Salami Wheel";
-        const c = document.getElementById('formCaption').value || "আপনার সালামি বুঝে নিন 🥰";
+        const t = document.getElementById('formTitle').value.trim() || "Salami Wheel";
+        const c = document.getElementById('formCaption').value.trim() || "আপনার সালামি বুঝে নিন 🥰";
         const i = document.getElementById('formItems').value.split("\n").filter(x => x.trim() !== "");
-        if (i.length < 2) { alert("কমপক্ষে ২টি টাকার ঘর দিন!"); return; }
+        
+        if (i.length < 2) { 
+            alert("কমপক্ষে ২টি টাকার ঘর দিন!"); 
+            return; 
+        }
+
+        // নতুন চাকা বানালে আগের সব জেতা রেজাল্ট ক্লিন করা হবে
+        localStorage.clear(); 
+
         const data = { t, c, i };
-        window.location.href = window.location.origin + window.location.pathname + "?d=" + btoa(JSON.stringify(data));
+        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+        const newUrl = window.location.origin + window.location.pathname + "?d=" + encoded;
+        window.location.href = newUrl;
     }
 
     function shareLink() {
         navigator.clipboard.writeText(window.location.href);
-        alert("লিঙ্ক কপি হয়েছে! এখন বন্ধুদের পাঠান।");
+        alert("লিঙ্ক কপি হয়েছে!");
     }
     window.onload = loadData;
 </script>
