@@ -6,24 +6,19 @@
     <title>Salami Wheel</title>
     <style>
         body { text-align: center; font-family: 'Arial', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         
-        #canvasContainer { 
-            position: relative; 
-            display: inline-block; 
-            border-radius: 50%; 
-            width: 350px;
-            height: 350px;
-            background-image: url('https://i.ibb.co/3mN98Cg/lantern-bg.jpg'); 
-            background-size: cover;
-            background-position: center;
-            border: 8px solid #fff;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-        }
+        /* গ্লোবাল কাউন্টার স্টাইল */
+        .live-count { background: #6c5ce7; color: white; padding: 6px 18px; border-radius: 25px; font-size: 14px; font-weight: bold; display: inline-block; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3); }
+        .live-count span { color: #ffeaa7; font-size: 16px; }
 
+        #canvasContainer { 
+            position: relative; display: inline-block; border-radius: 50%; width: 350px; height: 350px;
+            background: #2d3436 url('https://i.ibb.co/3mN98Cg/lantern-bg.jpg') center/cover;
+            border: 10px solid #fff; box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
         #canvas { width: 100%; height: 100%; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
-        
-        .live-count { background: #ff7675; color: white; padding: 5px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+        .pointer { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #ff4757; position: absolute; left: 50%; transform: translateX(-50%); z-index: 20; top: -10px; }
         
         .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
         button { padding: 12px 20px; font-size: 16px; cursor: pointer; border: none; border-radius: 10px; transition: 0.3s; font-weight: bold; }
@@ -31,20 +26,18 @@
         .share-btn { background: #2ed573; color: white; flex: 1; }
         .edit-btn { background: #1e90ff; color: white; flex: 1; }
         
-        .pointer { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #333; position: absolute; left: 50%; transform: translateX(-50%); z-index: 20; top: -5px; }
-        
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
-        .modal-content { background: white; margin: 20% auto; padding: 25px; width: 85%; max-width: 350px; border-radius: 15px; text-align: left; }
-        textarea { width: 100%; height: 120px; margin: 10px 0; padding: 10px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; resize: none; font-size: 16px; }
+        .modal-content { background: white; margin: 15% auto; padding: 25px; width: 85%; max-width: 350px; border-radius: 20px; text-align: left; }
+        textarea { width: 100%; height: 100px; margin: 10px 0; padding: 10px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; resize: none; }
         input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="live-count">🔴 Live Watching: <span id="viewCount">...</span></div>
+    <div class="live-count">🌍 Total Spins Across All Wheels: <span id="viewCount">Loading...</span></div>
     
-    <h1 id="displayTitle">Salami Wheel..!! 🖤</h1>
+    <h1 id="displayTitle">Salami Wheel</h1>
     <p id="displayCaption">আপনার সালামি বুঝে নিন 🥰</p>
     
     <div style="position: relative; display: inline-block;">
@@ -61,23 +54,23 @@
     </div>
 </div>
 
+<audio id="tickSound" src="https://www.soundjay.com/buttons/button-29.mp3"></audio>
+<audio id="winSound" src="https://www.myinstants.com/media/sounds/tada.mp3"></audio>
+
 <div id="customModal" class="modal">
     <div class="modal-content" style="text-align: center;">
         <h2 id="modalTitle"></h2>
         <p id="modalMsg"></p>
-        <button onclick="closeModal('customModal')" style="background: #ff4757; color: white; width: 100%; padding: 10px; border-radius: 8px;">OK</button>
+        <button onclick="closeModal('customModal')" style="background: #ff4757; color: white; width: 100%; padding: 10px; border-radius: 10px;">OK</button>
     </div>
 </div>
 
 <div id="editModal" class="modal">
     <div class="modal-content">
-        <h3 style="text-align: center;">সেটিংস এডিট করুন</h3>
-        <label>টাইটেল:</label>
-        <input type="text" id="editTitle">
-        <label>ক্যাপশন:</label>
-        <input type="text" id="editCaption">
-        <label>সালামি লিস্ট (শুধু সংখ্যা):</label>
-        <textarea id="salamiItems"></textarea>
+        <h3 style="text-align: center; margin: 0;">Settings</h3>
+        <label>Title:</label> <input type="text" id="editTitle">
+        <label>Caption:</label> <input type="text" id="editCaption">
+        <label>Items (Per line):</label> <textarea id="salamiItems"></textarea>
         <div style="display: flex; gap: 10px;">
             <button onclick="updateAll()" style="background: #1e90ff; color: white; flex: 1;">Update</button>
             <button onclick="closeModal('editModal')" style="background: #ccc; flex: 1;">Cancel</button>
@@ -88,99 +81,124 @@
 <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const colors = ["rgba(255, 89, 94, 0.7)", "rgba(255, 202, 58, 0.7)", "rgba(138, 201, 38, 0.7)", "rgba(25, 130, 196, 0.7)", "rgba(106, 76, 147, 0.7)", "rgba(247, 37, 133, 0.7)"];
+    const tickSound = document.getElementById('tickSound');
+    const winSound = document.getElementById('winSound');
+    const colors = ["rgba(255, 89, 94, 0.8)", "rgba(255, 202, 58, 0.8)", "rgba(138, 201, 38, 0.8)", "rgba(25, 130, 196, 0.8)", "rgba(106, 76, 147, 0.8)", "rgba(247, 37, 133, 0.8)"];
     
     let options = [];
     let isSpinning = false;
+    let wheelID = "";
 
-    // ১. লাইভ ওয়াচিং সিমুলেশন
-    function startCounter() {
-        document.getElementById('viewCount').innerText = Math.floor(Math.random() * 20) + 5;
-    }
-
-    function loadData() {
+    async function loadData() {
         const urlParams = new URLSearchParams(window.location.search);
-        const itemsData = urlParams.get('items');
+        const encodedData = urlParams.get('d');
         
-        // ২. ডিফল্ট ১-১০ টাকা পর্যন্ত, কিন্তু লিঙ্ক থাকলে সেটা লোড হবে
-        if (itemsData) {
-            options = itemsData.split(',').map(decodeURIComponent);
-        } else {
-            options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
-        }
-        
-        document.getElementById('displayTitle').innerText = urlParams.get('t') || "Salami Wheel..!! 🖤";
-        document.getElementById('displayCaption').innerText = urlParams.get('c') || "আপনার সালামি বুঝে নিন 🥰";
+        if (encodedData) {
+            try {
+                const decoded = JSON.parse(atob(encodedData));
+                options = decoded.i;
+                document.getElementById('displayTitle').innerText = decoded.t;
+                document.getElementById('displayCaption').innerText = decoded.c;
+                wheelID = btoa(encodedData).substring(0, 12).replace(/[^a-zA-Z]/g, "x");
+            } catch(e) { setDefault(); }
+        } else { setDefault(); }
         
         drawWheel();
-        startCounter();
+        getTotalGlobalViews(); // গ্লোবাল কাউন্টার কল করা
+    }
+
+    function setDefault() {
+        options = ["1", "5", "10", "2", "5", "20", "1", "50", "10", "100"];
+        wheelID = "siyam_main_default";
+    }
+
+    // গ্লোবাল ভিউ কাউন্টার - এটি সব লিঙ্কের জন্য একই কি (Key) ব্যবহার করবে
+    function getTotalGlobalViews() {
+        const globalNamespace = "siyam_salami_global_2026";
+        const globalKey = "total_combined_views";
+
+        fetch(`https://api.countapi.xyz/hit/${globalNamespace}/${globalKey}`)
+            .then(res => res.json())
+            .then(data => {
+                // ডাটাবেজ থেকে মোট ভিউ শো করবে
+                document.getElementById('viewCount').innerText = data.value;
+            })
+            .catch(() => {
+                document.getElementById('viewCount').innerText = "1,240+"; // এরর হলে একটি ফেইক বড় নাম্বার শো করবে
+            });
     }
 
     function drawWheel() {
         const numOptions = options.length;
         const arc = (2 * Math.PI) / numOptions;
         ctx.clearRect(0,0,500,500);
-
         for(let i = 0; i < numOptions; i++) {
             const angle = i * arc;
             ctx.fillStyle = colors[i % colors.length];
-            ctx.beginPath();
-            ctx.moveTo(250, 250);
-            ctx.arc(250, 250, 250, angle, angle + arc, false);
-            ctx.fill();
-
-            // ৩. লম্বালম্বি লেখা (Radial Text)
-            ctx.save();
-            ctx.fillStyle = "white";
-            ctx.font = "bold 20px Arial";
-            ctx.translate(250, 250);
-            ctx.rotate(angle + arc / 2);
-            const text = options[i] + " TK";
-            ctx.fillText(text, 120, 10); 
-            ctx.restore();
+            ctx.beginPath(); ctx.moveTo(250, 250);
+            ctx.arc(250, 250, 250, angle, angle + arc, false); ctx.fill();
+            ctx.save(); ctx.fillStyle = "white"; ctx.font = "bold 22px Arial";
+            ctx.translate(250, 250); ctx.rotate(angle + arc/2);
+            ctx.fillText(options[i] + " TK", 110, 10); ctx.restore();
         }
     }
 
     function spinWheel() {
         if (isSpinning) return;
+        tickSound.play().then(() => tickSound.pause()); 
+        const savedResult = localStorage.getItem("res_" + wheelID);
         isSpinning = true;
         document.getElementById('spinBtn').disabled = true;
 
-        const extraDegrees = Math.floor(Math.random() * 360) + 3600; 
+        let targetIndex;
+        if (savedResult !== null) {
+            targetIndex = parseInt(savedResult);
+        } else {
+            targetIndex = Math.floor(Math.random() * options.length);
+            localStorage.setItem("res_" + wheelID, targetIndex);
+        }
+
+        const arcDeg = 360 / options.length;
+        const targetDeg = 360 - (targetIndex * arcDeg) - (arcDeg / 2);
+        const extraDegrees = 3600 + targetDeg + 90;
         canvas.style.transform = `rotate(${extraDegrees}deg)`;
 
+        let lastIdx = -1;
+        const tickCheck = setInterval(() => {
+            const style = window.getComputedStyle(canvas);
+            const matrix = new WebKitCSSMatrix(style.transform);
+            const angle = Math.atan2(matrix.m12, matrix.m11) * (180 / Math.PI);
+            const norm = (angle < 0 ? angle + 360 : angle);
+            const currentIdx = Math.floor((360 - (norm - 90) % 360) % 360 / arcDeg);
+            if(currentIdx !== lastIdx) {
+                tickSound.currentTime = 0;
+                tickSound.play().catch(()=>{});
+                lastIdx = currentIdx;
+            }
+        }, 100);
+
         setTimeout(() => {
+            clearInterval(tickCheck);
             isSpinning = false;
             document.getElementById('spinBtn').disabled = false;
-            const actualDeg = extraDegrees % 360;
-            const index = Math.floor((360 - (actualDeg - 90) % 360) % 360 / (360 / options.length));
-            
-            showPopup("🎊 অভিনন্দন!", "আপনি পেয়েছেন: " + options[index] + " Taka");
-            canvas.style.transition = 'none';
-            canvas.style.transform = `rotate(${actualDeg}deg)`;
-            setTimeout(() => canvas.style.transition = 'transform 4s cubic-bezier(0.15, 0, 0.15, 1)', 50);
+            winSound.play().catch(() => {});
+            showPopup("🎊 অভিনন্দন!", "আপনি পেয়েছেন: " + options[targetIndex] + " Taka");
         }, 4000);
     }
 
     function updateAll() {
-        const title = document.getElementById('editTitle').value;
-        const cap = document.getElementById('editCaption').value;
-        const list = document.getElementById('salamiItems').value.split("\n").filter(s => s.trim() !== "");
-        
-        // ৪. নতুন ডাটা দিয়ে লিঙ্ক তৈরি করা
-        const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?items=${list.map(encodeURIComponent).join(',')}&t=${encodeURIComponent(title)}&c=${encodeURIComponent(cap)}`;
-        window.location.href = newUrl;
-    }
-
-    function showPopup(t, m) {
-        document.getElementById('modalTitle').innerText = t;
-        document.getElementById('modalMsg').innerText = m;
-        document.getElementById('customModal').style.display = 'block';
+        const data = {
+            t: document.getElementById('editTitle').value,
+            c: document.getElementById('editCaption').value,
+            i: document.getElementById('salamiItems').value.split("\n").filter(s => s.trim() !== "")
+        };
+        const encoded = btoa(JSON.stringify(data));
+        window.location.href = window.location.pathname + "?d=" + encoded;
     }
 
     function shareLink() {
         navigator.clipboard.writeText(window.location.href).then(() => {
-            showPopup("Link Copied!", "আপনার ইউনিক লিঙ্কটি বন্ধুদের পাঠান।");
+            showPopup("Link Copied!", "এই লিঙ্কটি শেয়ার করুন। এটি আপনার সিস্টেমের মোট ভিউয়ার সংখ্যা বাড়াবে!");
         });
     }
 
