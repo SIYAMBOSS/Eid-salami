@@ -5,12 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salami Wheel</title>
     <style>
-        body { text-align: center; font-family: 'Arial', sans-serif; background: #f0f2f5; }
-        .container { margin-top: 50px; }
-        #canvas { margin: 20px; border-radius: 50%; border: 5px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
-        button { padding: 10px 30px; font-size: 18px; cursor: pointer; background: #ff4757; color: #fff; border: none; border-radius: 25px; transition: 0.3s; }
-        button:hover { background: #ff6b81; }
-        .pointer { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid blue; position: absolute; left: 50%; transform: translateX(-50%); z-index: 10; }
+        body { text-align: center; font-family: 'Arial', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        #canvas { margin: 20px 0; border-radius: 50%; max-width: 100%; height: auto; }
+        .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; border: none; border-radius: 8px; transition: 0.3s; font-weight: bold; }
+        .spin-btn { background: #ff4757; color: white; width: 100%; margin-bottom: 10px; }
+        .share-btn { background: #2ed573; color: white; }
+        .edit-btn { background: #1e90ff; color: white; }
+        .pointer { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #2f3542; position: absolute; left: 50%; transform: translateX(-50%); z-index: 10; top: -5px; }
+        
+        /* Modal Style */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
+        .modal-content { background: white; margin: 20% auto; padding: 20px; width: 80%; border-radius: 10px; text-align: center; }
+        textarea { width: 90%; height: 100px; margin: 10px 0; padding: 10px; }
     </style>
 </head>
 <body>
@@ -18,22 +26,43 @@
 <div class="container">
     <h1>Salami Wheel..!! 🖤</h1>
     <p>Pick your EID salami..!! 🥰</p>
+    
     <div style="position: relative; display: inline-block;">
         <div class="pointer"></div>
         <canvas id="canvas" width="400" height="400"></canvas>
     </div>
-    <br>
-    <button onclick="spinWheel()">Spin Now!</button>
+
+    <div class="controls">
+        <button class="spin-btn" onclick="spinWheel()">Spin Now!</button>
+        <button class="edit-btn" onclick="openEditModal()">Edit Salami</button>
+        <button class="share-btn" onclick="shareLink()">Share Link</button>
+    </div>
+</div>
+
+<div id="resultModal" class="modal">
+    <div class="modal-content">
+        <h2 id="resultText"></h2>
+        <button onclick="closeModal('resultModal')" style="background: #ff4757; color: white;">OK</button>
+    </div>
+</div>
+
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h3>সালামির লিস্ট এডিট করুন</h3>
+        <p>(কমা দিয়ে আলাদা করুন যেমন: 5 Taka, 10 Taka)</p>
+        <textarea id="salamiItems"></textarea><br>
+        <button onclick="updateWheel()" style="background: #1e90ff; color: white;">Update</button>
+        <button onclick="closeModal('editModal')">Cancel</button>
+    </div>
 </div>
 
 <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const options = ["5 Taka", "10 Taka", "2 Taka", "20 Taka", "50 Taka", "1 Taka", "100 Taka", "5 Taka"];
-    const colors = ["#ff595e", "#ffca3a", "#8ac926", "#1982c4", "#6a4c93", "#f72585", "#4cc9f0", "#3a0ca3"];
+    let options = ["5 Taka", "10 Taka", "2 Taka", "20 Taka", "50 Taka", "1 Taka", "100 Taka", "5 Taka"];
+    const colors = ["#ff595e", "#ffca3a", "#8ac926", "#1982c4", "#6a4c93", "#f72585", "#4cc9f0", "#3a0ca3", "#ff9f43", "#ee5253"];
     
     let startAngle = 0;
-    const arc = Math.PI / (options.length / 2);
     let spinTimeout = null;
     let spinAngleStart = 10;
     let spinTime = 0;
@@ -41,15 +70,17 @@
 
     function drawWheel() {
         ctx.clearRect(0,0,400,400);
+        const arc = Math.PI / (options.length / 2);
         for(let i = 0; i < options.length; i++) {
             const angle = startAngle + i * arc;
-            ctx.fillStyle = colors[i];
+            ctx.fillStyle = colors[i % colors.length];
             ctx.beginPath();
             ctx.moveTo(200, 200);
             ctx.arc(200, 200, 180, angle, angle + arc, false);
             ctx.fill();
             ctx.save();
             ctx.fillStyle = "white";
+            ctx.font = "bold 16px Arial";
             ctx.translate(200 + Math.cos(angle + arc / 2) * 130, 200 + Math.sin(angle + arc / 2) * 130);
             ctx.rotate(angle + arc / 2 + Math.PI / 2);
             ctx.fillText(options[i], -ctx.measureText(options[i]).width / 2, 0);
@@ -78,16 +109,40 @@
 
     function stopRotateWheel() {
         clearTimeout(spinTimeout);
+        const arc = Math.PI / (options.length / 2);
         const degrees = startAngle * 180 / Math.PI + 90;
         const arcd = arc * 180 / Math.PI;
         const index = Math.floor((360 - degrees % 360) / arcd);
-        alert("ঈদ মোবারক! আপনি পেয়েছেন: " + options[index]);
+        
+        document.getElementById('resultText').innerText = "ঈদ মোবারক! আপনি পেয়েছেন: " + options[index];
+        document.getElementById('resultModal').style.display = 'block';
     }
 
     function easeOut(t, b, c, d) {
         const ts = (t /= d) * t;
         const tc = ts * t;
         return b + c * (tc + -3 * ts + 3 * t);
+    }
+
+    function openEditModal() {
+        document.getElementById('salamiItems').value = options.join(", ");
+        document.getElementById('editModal').style.display = 'block';
+    }
+
+    function updateWheel() {
+        const val = document.getElementById('salamiItems').value;
+        options = val.split(",").map(item => item.trim()).filter(item => item !== "");
+        drawWheel();
+        closeModal('editModal');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    function shareLink() {
+        navigator.clipboard.writeText(window.location.href);
+        alert("লিঙ্ক কপি হয়েছে! এখন আপনার বন্ধুদের পাঠান।");
     }
 
     drawWheel();
