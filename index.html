@@ -18,52 +18,59 @@
             padding: 40px 20px; border-radius: 40px; border: 1px solid rgba(255, 215, 0, 0.2);
             width: 92%; max-width: 400px; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
-        .eid-decor { font-size: 24px; color: var(--eid-gold); margin-bottom: 10px; }
-        h1 { font-size: 32px; margin: 5px 0; color: var(--eid-gold); text-shadow: 0 0 15px rgba(255,215,0,0.5); }
+        h1 { font-size: 32px; margin: 10px 0; color: var(--eid-gold); text-shadow: 0 0 15px rgba(255,215,0,0.5); }
         #wheel-container { position: relative; width: 300px; height: 300px; margin: 25px auto; border: 6px solid rgba(255, 215, 0, 0.1); border-radius: 50%; }
         .pointer { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 35px; z-index: 100; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
+        
+        /* 10 Seconds Spin Transition */
         canvas { width: 100%; height: 100%; border-radius: 50%; transition: transform 10s cubic-bezier(0.1, 0, 0.1, 1); }
-        .btn-group { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; align-items: center; }
-        .spin-btn { background: linear-gradient(45deg, #ffd700, #b8860b); border: none; color: #001a14; padding: 16px 0; width: 90%; font-size: 18px; font-weight: bold; border-radius: 50px; cursor: pointer; text-transform: uppercase; }
-        .share-btn { background: transparent; border: 1px solid rgba(255, 215, 0, 0.4); color: var(--eid-gold); padding: 10px 30px; border-radius: 50px; cursor: pointer; font-size: 14px; }
+
+        .spin-btn { 
+            background: linear-gradient(45deg, #ffd700, #b8860b); border: none; color: #001a14; 
+            padding: 16px 0; width: 90%; font-size: 18px; font-weight: bold; 
+            border-radius: 50px; cursor: pointer; text-transform: uppercase; margin-top: 20px;
+        }
+        .share-btn { background: transparent; border: 1px solid rgba(255, 215, 0, 0.4); color: var(--eid-gold); padding: 10px 30px; border-radius: 50px; cursor: pointer; margin-top: 15px; }
+
+        /* Modal Styles */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); }
         .modal-content { background: #002b24; margin: 40% auto; padding: 30px 20px; width: 80%; max-width: 320px; border-radius: 30px; border: 2px solid var(--eid-gold); text-align: center; }
-        #youtube-player { display: none; }
+        #youtube-player { position: absolute; top: -9999px; left: -9999px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="eid-decor">🌙 ⭐</div>
+    <div style="font-size: 24px;">🌙 ⭐</div>
     <h1>Eid Salami ✨</h1>
-    <p style="font-size: 15px; color: #bdc3c7; margin-top: 15px;">সালামি নিতে চাকাটি ঘুরান 🥰</p>
+    <p style="font-size: 15px; color: #bdc3c7;">সালামি নিতে চাকাটি ঘুরান 🥰</p>
+
     <div id="wheel-container">
         <img src="https://cdn-icons-png.flaticon.com/512/8213/8213522.png" class="pointer" alt="pointer">
         <canvas id="canvas" width="600" height="600"></canvas>
     </div>
-    <div class="btn-group">
-        <button class="spin-btn" id="spinBtn" onclick="spinWheel()">Spin Now</button>
-        <button class="share-btn" onclick="shareLink()">🔗 Share with Friends</button>
-    </div>
+
+    <button class="spin-btn" id="spinBtn" onclick="spinWheel()">Spin Now</button>
+    <button class="share-btn" onclick="shareLink()">🔗 Share with Friends</button>
 </div>
 
 <div id="winModal" class="modal">
     <div class="modal-content">
-        <h2 id="modalTitle" style="margin: 0;">ঈদ মোবারক! 🌙</h2>
-        <div id="modalIcon" style="font-size: 45px; margin: 15px 0;">💌</div>
+        <h2 id="modalTitle" style="margin: 0;">দোয়া নির্বাচিত হয়েছে</h2>
+        <div id="modalIcon" style="font-size: 45px; margin: 15px 0;">🤲</div>
         <div id="modalMsg"></div>
         <button onclick="closeModal()" style="background: var(--dua-green); color: #001a14; border: none; padding: 12px 0; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 15px;">ঠিক আছে</button>
     </div>
 </div>
 
 <div id="youtube-player"></div>
-<script src="https://www.youtube.com/iframe_api"></script>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
     let player;
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('youtube-player', {
-            height: '0', width: '0', videoId: 'PTSbiHMpRtE',
+            height: '1', width: '1', videoId: 'PTSbiHMpRtE',
             playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'PTSbiHMpRtE' }
         });
     }
@@ -71,7 +78,7 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     
-    // ৫-১৫ টাকা, দোয়া এবং ১ টাকা অপশন
+    // Wheel Options
     const options = ["5 TK", "6 TK", "7 TK", "8 TK", "9 TK", "10 TK", "11 TK", "12 TK", "13 TK", "14 TK", "15 TK", "দোয়া", "1 TK"];
     const colors = ["#006266", "#1e272e", "#009432", "#2d3436", "#006266", "#1e272e", "#009432", "#2d3436", "#006266", "#1e272e", "#009432", "#2ecc71", "#eb4d4b"];
 
@@ -96,16 +103,16 @@
         if (isSpinning) return;
         isSpinning = true;
         document.getElementById('spinBtn').disabled = true;
-        if(player && player.playVideo) player.playVideo();
 
-        // Probability Logic: 70% Dua, 30% 1 TK
-        const rand = Math.random() * 100;
-        let winIdx;
-        if (rand <= 70) {
-            winIdx = options.indexOf("দোয়া"); // 70% chance
-        } else {
-            winIdx = options.indexOf("1 TK"); // 30% chance
+        // Start Fixed Audio via API
+        if(player && player.playVideo) {
+            player.unMute();
+            player.playVideo();
         }
+
+        // 70% Dua, 30% 1 TK
+        const rand = Math.random() * 100;
+        let winIdx = (rand <= 70) ? options.indexOf("দোয়া") : options.indexOf("1 TK");
 
         const sliceDeg = 360 / options.length;
         const stopDeg = (360 - (winIdx * sliceDeg)) - (sliceDeg / 2);
@@ -129,7 +136,7 @@
             title.style.color = "#2ecc71";
             icon.innerText = "🤲";
             msg.innerHTML = `
-                <p style="font-style: italic; margin: 10px 0; color: #eee;">"নিঃস্ব আমি, রিক্ত আমি দেবার কিছু নাই, আছে শুধু ভালোবাসা দিয়ে গেলাম তাই"</p>
+                <p style="font-style: italic; margin: 15px 0; color: #eee;">"নিঃস্ব আমি, রিক্ত আমি দেবার কিছু নাই, আছে শুধু ভালোবাসা দিয়ে গেলাম তাই"</p>
                 <p style="font-size: 13px; color: #bdc3c7;">আপনি আর মাত্র ২ বার চেষ্টা করতে পারবেন, এরপর পুনরায় আবার চেষ্টা করতে পারবেন।</p>
             `;
         } else {
@@ -143,9 +150,9 @@
 
     function closeModal() { document.getElementById('winModal').style.display = 'none'; }
     function shareLink() {
-        const fixedUrl = "https://eid-salami-eta.vercel.app/";
-        if (navigator.share) navigator.share({ title: 'Eid Salami', url: fixedUrl });
-        else { navigator.clipboard.writeText(fixedUrl); alert("Link Copied!"); }
+        const url = "https://eid-salami-eta.vercel.app/";
+        if (navigator.share) navigator.share({ title: 'Eid Salami', url: url });
+        else { navigator.clipboard.writeText(url); alert("Link Copied!"); }
     }
     drawWheel();
 </script>
