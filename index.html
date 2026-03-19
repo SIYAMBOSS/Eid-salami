@@ -7,30 +7,49 @@
     <style>
         body { text-align: center; font-family: 'Arial', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        #canvas { margin: 20px 0; border-radius: 50%; max-width: 100%; height: auto; border: 5px solid #fff; box-shadow: 0 0 15px rgba(0,0,0,0.1); transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
-        .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        
+        /* ব্যাকগ্রাউন্ড ইমেজের জন্য স্টাইল */
+        #canvasContainer { 
+            position: relative; 
+            display: inline-block; 
+            border-radius: 50%; 
+            overflow: hidden;
+            width: 400px;
+            height: 400px;
+            background-image: url('https://i.ibb.co/3mN98Cg/lantern-bg.jpg'); /* এখানে আপনার ছবি থাকবে */
+            background-size: cover;
+            background-position: center;
+            border: 8px solid #fff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        }
+
+        #canvas { width: 100%; height: 100%; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
+        
+        .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
         button { padding: 12px 20px; font-size: 16px; cursor: pointer; border: none; border-radius: 8px; transition: 0.3s; font-weight: bold; }
         .spin-btn { background: #ff4757; color: white; width: 100%; margin-bottom: 10px; }
         .share-btn { background: #2ed573; color: white; flex: 1; }
         .edit-btn { background: #1e90ff; color: white; flex: 1; }
-        .pointer { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #333; position: absolute; left: 50%; transform: translateX(-50%); z-index: 10; top: -5px; }
+        
+        .pointer { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #ff4757; position: absolute; left: 50%; transform: translateX(-50%); z-index: 20; top: -5px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
         
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); }
         .modal-content { background: white; margin: 15% auto; padding: 25px; width: 85%; max-width: 350px; border-radius: 15px; text-align: left; }
-        textarea { width: 100%; height: 120px; margin: 10px 0; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; resize: none; }
+        textarea { width: 100%; height: 100px; margin: 10px 0; padding: 10px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; resize: none; }
         input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
-        label { font-weight: bold; font-size: 14px; color: #444; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1 id="displayTitle" style="margin-bottom: 5px;">Salami Wheel..!! 🖤</h1>
-    <p id="displayCaption" style="margin-top: 0;">Pick your EID salami..!! 🥰</p>
+    <h1 id="displayTitle">Salami Wheel..!! 🖤</h1>
+    <p id="displayCaption">আপনার সালামি বুঝে নিন 🥰</p>
     
     <div style="position: relative; display: inline-block;">
         <div class="pointer"></div>
-        <canvas id="canvas" width="500" height="500"></canvas>
+        <div id="canvasContainer">
+            <canvas id="canvas" width="500" height="500"></canvas>
+        </div>
     </div>
 
     <div class="controls">
@@ -55,7 +74,7 @@
         <input type="text" id="editTitle">
         <label>ক্যাপশন:</label>
         <input type="text" id="editCaption">
-        <label>সালামির লিস্ট (প্রতি লাইনে একটি):</label>
+        <label>সালামি (প্রতি লাইনে একটি সংখ্যা):</label>
         <textarea id="salamiItems"></textarea>
         <div style="display: flex; gap: 10px;">
             <button onclick="updateAll()" style="background: #1e90ff; color: white; flex: 1;">Update</button>
@@ -67,7 +86,8 @@
 <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const colors = ["#ff595e", "#ffca3a", "#8ac926", "#1982c4", "#6a4c93", "#f72585", "#4cc9f0", "#3a0ca3", "#ff9f43", "#ee5253", "#00d2d3", "#ffb142", "#1dd1a1", "#54a0ff", "#5f27cd", "#c0392b", "#27ae60", "#2980b9", "#8e44ad", "#f39c12"];
+    // কালারগুলোতে হালকা ট্রান্সপারেন্সি দেওয়া হয়েছে যাতে ব্যাকগ্রাউন্ডের ছবি কিছুটা বোঝা যায়
+    const colors = ["rgba(255, 89, 94, 0.7)", "rgba(255, 202, 58, 0.7)", "rgba(138, 201, 38, 0.7)", "rgba(25, 130, 196, 0.7)", "rgba(106, 76, 147, 0.7)", "rgba(247, 37, 133, 0.7)", "rgba(76, 201, 240, 0.7)"];
     
     let options = [];
     let currentTitle = "";
@@ -79,7 +99,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const itemsData = urlParams.get('items');
         currentTitle = urlParams.get('t') || "Salami Wheel..!! 🖤";
-        currentCaption = urlParams.get('c') || "Pick your EID salami..!! 🥰";
+        currentCaption = urlParams.get('c') || "আপনার সালামি বুঝে নিন 🥰";
         
         options = itemsData ? itemsData.split(',').map(decodeURIComponent) : ["10", "50", "100", "5", "20", "500", "10", "1000"];
         
@@ -95,28 +115,20 @@
 
         for(let i = 0; i < numOptions; i++) {
             const angle = startAngle + i * arc;
-            
-            // স্লাইস আঁকা
             ctx.fillStyle = colors[i % colors.length];
             ctx.beginPath();
             ctx.moveTo(250, 250);
-            ctx.arc(250, 250, 240, angle, angle + arc, false);
+            ctx.arc(250, 250, 250, angle, angle + arc, false);
             ctx.fill();
-            ctx.stroke();
 
-            // লেখা আঁকা (লম্বালম্বি/Radial)
+            // লম্বালম্বি টেক্সট
             ctx.save();
             ctx.fillStyle = "white";
-            ctx.font = "bold 16px Arial";
-            
-            // কেন্দ্রবিন্দুতে সরিয়ে নেওয়া
+            ctx.font = "bold 18px Arial";
             ctx.translate(250, 250);
-            // স্লাইসের মাঝখানের এঙ্গেলে রোটেট করা
             ctx.rotate(angle + arc / 2);
-            
-            // লেখাকে লম্বালম্বিভাবে সেট করা
             const text = options[i] + " Taka";
-            ctx.fillText(text, 70, 5); // কেন্দ্র থেকে ৭০ পিক্সেল দূরে শুরু হবে
+            ctx.fillText(text, 100, 5); 
             ctx.restore();
         }
     }
@@ -133,10 +145,9 @@
             isSpinning = false;
             document.getElementById('spinBtn').disabled = false;
             const actualDeg = extraDegrees % 360;
-            const numOptions = options.length;
-            const index = Math.floor((360 - (actualDeg - 90) % 360) % 360 / (360 / numOptions));
+            const index = Math.floor((360 - (actualDeg - 90) % 360) % 360 / (360 / options.length));
             
-            showPopup("🎉 ঈদ মোবারক!", "আপনি পেয়েছেন: " + options[index] + " Taka");
+            showPopup("🎊 ঈদ মোবারক!", "আপনি পেয়েছেন: " + options[index] + " Taka");
             canvas.style.transition = 'none';
             canvas.style.transform = `rotate(${actualDeg}deg)`;
             setTimeout(() => canvas.style.transition = 'transform 4s cubic-bezier(0.15, 0, 0.15, 1)', 50);
@@ -144,8 +155,8 @@
     }
 
     function updateAll() {
-        const newTitle = document.getElementById('editTitle').value || "Salami Wheel..!! 🖤";
-        const newCaption = document.getElementById('editCaption').value || "Pick your EID salami..!! 🥰";
+        const newTitle = document.getElementById('editTitle').value;
+        const newCaption = document.getElementById('editCaption').value;
         const newOptions = document.getElementById('salamiItems').value.split("\n").map(s => s.trim()).filter(s => s !== "");
         
         if(newOptions.length < 2) return alert("কমপক্ষে ২টি ঘর দিন!");
@@ -153,13 +164,7 @@
         const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?items=${newOptions.map(encodeURIComponent).join(',')}&t=${encodeURIComponent(newTitle)}&c=${encodeURIComponent(newCaption)}`;
         window.history.pushState({path:newUrl},'',newUrl);
         
-        options = newOptions;
-        currentTitle = newTitle;
-        currentCaption = newCaption;
-        document.getElementById('displayTitle').innerText = currentTitle;
-        document.getElementById('displayCaption').innerText = currentCaption;
-        drawWheel();
-        closeModal('editModal');
+        location.reload(); // ডাটা আপডেট করে পেজ রিফ্রেশ
     }
 
     function showPopup(t, m) {
