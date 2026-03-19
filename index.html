@@ -3,158 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salami Wheel - Box Fix</title>
+    <title>Premium Salami Wheel</title>
     <style>
-        body { text-align: center; font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); margin: 0; padding: 15px; min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #333; }
-        .container { max-width: 420px; width: 100%; background: #ffffff; padding: 25px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        .live-count { background: #eb4d4b; color: white; padding: 8px 20px; border-radius: 50px; font-size: 14px; font-weight: bold; display: inline-block; margin-bottom: 20px; }
-        
-        #canvasContainer { 
-            position: relative; display: inline-block; border-radius: 50%; width: 320px; height: 320px;
-            background: #f1f2f6; border: 10px solid #ffffff; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --bg: #0f0c29;
         }
-        #canvas { width: 100%; height: 100%; transition: transform 4s cubic-bezier(0.1, 0, 0.1, 1); }
-        .pointer { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #130f40; position: absolute; left: 50%; transform: translateX(-50%); z-index: 20; top: -5px; }
-        
-        .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
-        button { padding: 14px 20px; font-size: 15px; cursor: pointer; border: none; border-radius: 15px; transition: 0.3s; font-weight: bold; }
-        .spin-btn { background: #ff4757; color: white; width: 100%; box-shadow: 0 6px #c0392b; text-transform: uppercase; }
-        .share-btn { background: #27ae60; color: white; flex: 1; }
-        .create-nav-btn { background: #f9ca24; color: #333; flex: 1; }
-        
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
-        .modal-content { background: white; margin: 15% auto; padding: 25px; width: 85%; max-width: 320px; border-radius: 25px; text-align: left; }
-        textarea, input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
+
+        body {
+            background: linear-gradient(to bottom, #24243e, #302b63, #0f0c29);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px 20px;
+            border-radius: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .live-badge {
+            background: rgba(255, 71, 87, 0.2);
+            border: 1px solid #ff4757;
+            color: #ff4757;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+            animation: pulse 2s infinite;
+        }
+
+        h1 { font-size: 28px; margin: 10px 0; background: linear-gradient(to right, #fff, #a29bfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        #wheel-wrapper {
+            position: relative;
+            margin: 30px auto;
+            width: 340px;
+            height: 340px;
+            border: 8px solid rgba(255,255,255,0.05);
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(108, 92, 231, 0.3);
+        }
+
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            z-index: 100;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1);
+        }
+
+        .spin-btn {
+            background: linear-gradient(45deg, #6c5ce7, #fd79a8);
+            border: none;
+            color: white;
+            padding: 18px 50px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.4);
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            width: 80%;
+        }
+
+        .spin-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(108, 92, 231, 0.6); }
+        .spin-btn:active { transform: translateY(2px); }
+        .spin-btn:disabled { background: #444; box-shadow: none; opacity: 0.5; }
+
+        /* Win Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: #1e1e2f;
+            margin: 25% auto;
+            padding: 40px;
+            width: 80%;
+            max-width: 320px;
+            border-radius: 30px;
+            border: 2px solid #6c5ce7;
+            text-align: center;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="live-count">🌍 Total Spins: <span id="viewCount">2,480</span></div>
-    
-    <div id="wheelSection">
-        <h1 id="displayTitle" style="margin: 0; font-size: 24px;">Salami Wheel..!! 🖤</h1>
-        <p id="displayCaption" style="color: #666; margin-bottom: 20px;">আপনার সালামি বুঝে নিন 🥰</p>
-        
-        <div style="position: relative; display: inline-block;">
-            <div class="pointer"></div>
-            <div id="canvasContainer">
-                <canvas id="canvas" width="500" height="500"></canvas>
-            </div>
-        </div>
+    <div class="live-badge">● LIVE SPINS: <span id="viewCount">3,120</span></div>
+    <h1>Salami Wheel ✨</h1>
+    <p style="color: #ccc; font-size: 14px;">আপনার ভাগ্য পরীক্ষা করুন</p>
 
-        <div class="controls">
-            <button class="spin-btn" id="spinBtn" onclick="spinWheel()">Spin Now!</button>
-            <button class="share-btn" onclick="shareLink()">Share Link</button>
-            <button class="create-nav-btn" onclick="openCreateModal()">Create Mine</button>
-        </div>
+    <div id="wheel-wrapper">
+        <img src="https://cdn-icons-png.flaticon.com/512/8213/8213522.png" class="pointer" alt="pointer">
+        <canvas id="canvas" width="600" height="600"></canvas>
+    </div>
+
+    <button class="spin-btn" id="spinBtn" onclick="spinWheel()">Spin Now</button>
+</div>
+
+<div id="winModal" class="modal">
+    <div class="modal-content">
+        <h2 style="color: #fd79a8; margin: 0;">🎉 কপাল খুলেছে!</h2>
+        <div style="font-size: 50px; margin: 20px 0;">🎁</div>
+        <p id="modalMsg" style="font-size: 28px; font-weight: bold; margin-bottom: 30px;"></p>
+        <button onclick="closeModal()" style="background: #6c5ce7; color: white; border: none; padding: 12px 30px; border-radius: 15px; font-weight: bold; cursor: pointer; width: 100%;">সংগ্রহ করুন</button>
     </div>
 </div>
 
 <audio id="tickSound" src="https://www.soundjay.com/buttons/button-29.mp3"></audio>
 <audio id="winSound" src="https://www.myinstants.com/media/sounds/tada.mp3"></audio>
 
-<div id="winModal" class="modal">
-    <div class="modal-content" style="text-align: center;">
-        <h2 style="color: #ff4757;">🎊 অভিনন্দন!</h2>
-        <p id="modalMsg" style="font-size: 24px; font-weight: bold; color: #333;"></p>
-        <button onclick="closeModal('winModal')" style="background: #27ae60; color: white; width: 100%; padding: 12px; border-radius: 12px; margin-top: 10px;">সংগ্রহ করুন</button>
-    </div>
-</div>
-
-<div id="createModal" class="modal">
-    <div class="modal-content">
-        <h3 style="text-align: center;">Create Your Wheel</h3>
-        <label>Title:</label> <input type="text" id="formTitle" placeholder="Ex: Siyam's Salami">
-        <label>Amounts (প্রতি লাইনে একটি টাকা):</label> 
-        <textarea id="formItems" rows="6" placeholder="10&#10;20&#10;50&#10;100&#10;200"></textarea>
-        <button onclick="generateLink()" style="background: #ff4757; color: white; width: 100%; padding: 12px; border-radius: 12px; margin-top: 10px; font-weight: bold;">Generate & Save</button>
-        <button onclick="closeModal('createModal')" style="background: #ccc; width: 100%; padding: 8px; border-radius: 12px; margin-top: 5px;">Cancel</button>
-    </div>
-</div>
-
 <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const tickSound = document.getElementById('tickSound');
     const winSound = document.getElementById('winSound');
-    const colors = ["#ff9f43", "#ee5253", "#1dd1a1", "#54a0ff", "#5f27cd", "#f368e0", "#ff6b6b", "#48dbfb"];
     
-    let options = [];
-    let isSpinning = false;
+    const options = ["1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.8", "1.9", "2.0"];
+    const colors = ["#6c5ce7", "#2d3436", "#a29bfe", "#4834d4", "#fd79a8", "#1e272e", "#fab1a0", "#0984e3", "#636e72", "#d63031"];
+
     let currentRotation = 0;
+    let isSpinning = false;
 
-    // ১. ডাটা লোড এবং চাকা তৈরি
-    function init() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const d = urlParams.get('d');
-        if (d) {
-            try {
-                const decoded = JSON.parse(decodeURIComponent(escape(atob(d))));
-                options = decoded.i;
-                document.getElementById('displayTitle').innerText = decoded.t;
-            } catch(e) { setDefault(); }
-        } else { setDefault(); }
-        drawWheel();
-    }
-
-    function setDefault() {
-        options = ["5", "10", "2", "20", "50", "100"];
-    }
-
-    // ২. বক্স অনুযায়ী চাকা ড্র করা (Dynamically update boxes)
     function drawWheel() {
-        const numSlices = options.length;
-        const arc = (2 * Math.PI) / numSlices;
-        ctx.clearRect(0, 0, 500, 500);
-
-        for (let i = 0; i < numSlices; i++) {
+        const arc = (2 * Math.PI) / options.length;
+        ctx.clearRect(0,0,600,600);
+        
+        for(let i = 0; i < options.length; i++) {
             const angle = i * arc;
+            
+            // Slice
             ctx.fillStyle = colors[i % colors.length];
             ctx.beginPath();
-            ctx.moveTo(250, 250);
-            ctx.arc(250, 250, 250, angle, angle + arc);
+            ctx.moveTo(300, 300);
+            ctx.arc(300, 300, 280, angle, angle + arc);
             ctx.fill();
+            
+            // Border
+            ctx.strokeStyle = "rgba(255,255,255,0.1)";
+            ctx.lineWidth = 2;
+            ctx.stroke();
 
-            // টেক্সট ড্র করা
+            // Text
             ctx.save();
             ctx.fillStyle = "white";
-            ctx.font = "bold 22px Arial";
-            ctx.translate(250, 250);
-            ctx.rotate(angle + arc / 2);
-            ctx.fillText(options[i] + " TK", 120, 10);
+            ctx.font = "bold 26px Arial";
+            ctx.translate(300, 300);
+            ctx.rotate(angle + arc/2);
+            ctx.fillText(options[i], 160, 10);
             ctx.restore();
         }
     }
 
-    // ৩. স্পিন এবং সঠিক রেজাল্ট বের করা
     function spinWheel() {
         if (isSpinning) return;
         isSpinning = true;
         document.getElementById('spinBtn').disabled = true;
 
-        const numSlices = options.length;
-        const arcDeg = 360 / numSlices;
-        const winningIndex = Math.floor(Math.random() * numSlices);
-
-        // চাকা ঘোরানোর ডিগ্রি ক্যালকুলেশন
-        const landingRotation = 360 - (winningIndex * arcDeg) - (arcDeg / 2);
-        const extraSpins = 3600; // ১০ বার ঘুরবে
-        const baseRotation = currentRotation - (currentRotation % 360);
-        currentRotation = baseRotation + extraSpins + landingRotation + 90;
-
+        const arcDeg = 360 / options.length;
+        const winIdx = Math.floor(Math.random() * options.length);
+        const targetDeg = 360 - (winIdx * arcDeg) - (arcDeg / 2);
+        
+        currentRotation += (360 * 8) + targetDeg + (360 - (currentRotation % 360));
         canvas.style.transform = `rotate(${currentRotation}deg)`;
 
-        // শব্দ করা
+        // Audio logic
         let lastIdx = -1;
         const ticker = setInterval(() => {
             const style = window.getComputedStyle(canvas);
             const matrix = new WebKitCSSMatrix(style.transform);
             const angle = Math.atan2(matrix.m12, matrix.m11) * (180 / Math.PI);
             const norm = (360 - (angle < 0 ? angle + 360 : angle) + 90) % 360;
-            const currentIdx = Math.floor(norm / arcDeg) % numSlices;
-            
-            if (currentIdx !== lastIdx) {
+            const currentIdx = Math.floor(norm / arcDeg) % options.length;
+            if(currentIdx !== lastIdx) {
                 tickSound.currentTime = 0;
                 tickSound.play().catch(()=>{});
                 lastIdx = currentIdx;
@@ -165,34 +224,21 @@
             clearInterval(ticker);
             isSpinning = false;
             document.getElementById('spinBtn').disabled = false;
-            winSound.play().catch(() => {});
-            
-            // রেজাল্ট দেখানো
-            document.getElementById('modalMsg').innerText = "আপনি পেয়েছেন: " + options[winningIndex] + " Taka";
+            winSound.play().catch(()=>{});
+            document.getElementById('modalMsg').innerText = options[winIdx] + " পয়েন্ট";
             document.getElementById('winModal').style.display = 'block';
-        }, 4000);
+        }, 5000);
     }
 
-    // ৪. নতুন চাকা জেনারেট করা
-    function generateLink() {
-        const t = document.getElementById('formTitle').value.trim() || "Salami Wheel";
-        const items = document.getElementById('formItems').value.split("\n").filter(x => x.trim() !== "");
-        
-        if (items.length < 2) {
-            alert("কমপক্ষে ২টি টাকার পরিমাণ দিন!");
-            return;
-        }
+    function closeModal() { document.getElementById('winModal').style.display = 'none'; }
 
-        const data = { t: t, i: items };
-        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-        window.location.href = window.location.origin + window.location.pathname + "?d=" + encoded;
-    }
+    // Counter
+    setInterval(() => {
+        let c = parseInt(document.getElementById('viewCount').innerText.replace(',',''));
+        document.getElementById('viewCount').innerText = (c + Math.floor(Math.random()*5)).toLocaleString();
+    }, 3000);
 
-    function openCreateModal() { document.getElementById('createModal').style.display = 'block'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function shareLink() { navigator.clipboard.writeText(window.location.href); alert("লিঙ্ক কপি হয়েছে!"); }
-
-    window.onload = init;
+    window.onload = drawWheel;
 </script>
 </body>
 </html>
