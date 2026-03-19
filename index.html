@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salami Wheel</title>
+    <title>Salami Wheel - Spin & Create</title>
     <style>
-        body { text-align: center; font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); margin: 0; padding: 15px; min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #333; }
-        .container { max-width: 420px; width: 100%; background: #ffffff; padding: 25px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        body { text-align: center; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); margin: 0; padding: 15px; min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #333; }
+        .container { max-width: 420px; width: 100%; background: #ffffff; padding: 25px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); position: relative; }
         
         .live-count { background: #eb4d4b; color: white; padding: 8px 20px; border-radius: 50px; font-size: 14px; font-weight: bold; display: inline-block; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(235, 77, 75, 0.4); }
         .live-count span { color: #f9ca24; font-size: 16px; }
@@ -18,16 +18,19 @@
         #canvas { width: 100%; height: 100%; transition: transform 4s cubic-bezier(0.1, 0, 0.1, 1); }
         .pointer { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #130f40; position: absolute; left: 50%; transform: translateX(-50%); z-index: 20; top: -5px; }
         
-        .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 25px; }
+        .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
         button { padding: 14px 20px; font-size: 15px; cursor: pointer; border: none; border-radius: 15px; transition: 0.3s; font-weight: bold; }
         .spin-btn { background: #ff4757; color: white; width: 100%; box-shadow: 0 6px #c0392b; text-transform: uppercase; }
         .spin-btn:active { box-shadow: none; transform: translateY(6px); }
         .share-btn { background: #27ae60; color: white; flex: 1; }
-        .edit-btn { background: #2980b9; color: white; flex: 1; }
+        .create-nav-btn { background: #f9ca24; color: #333; flex: 1; }
         
+        /* Modal & Form */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
-        .modal-content { background: white; margin: 20% auto; padding: 25px; width: 85%; max-width: 320px; border-radius: 20px; text-align: left; }
-        textarea, input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        .modal-content { background: white; margin: 15% auto; padding: 25px; width: 85%; max-width: 320px; border-radius: 25px; text-align: left; }
+        textarea, input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
+        
+        .win-modal-content { text-align: center; }
     </style>
 </head>
 <body>
@@ -35,43 +38,48 @@
 <div class="container">
     <div id="liveCountBox" class="live-count">🌍 Total Spins: <span id="viewCount">1,580</span></div>
     
-    <h1 id="displayTitle" style="margin: 0; font-size: 24px;">Salami Wheel..!! 🖤</h1>
-    <p id="displayCaption" style="color: #666; margin-bottom: 20px;">আপনার সালামি বুঝে নিন 🥰</p>
-    
-    <div style="position: relative; display: inline-block;">
-        <div class="pointer"></div>
-        <div id="canvasContainer">
-            <canvas id="canvas" width="500" height="500"></canvas>
+    <div id="wheelSection">
+        <h1 id="displayTitle" style="margin: 0; font-size: 24px;">Salami Wheel..!! 🖤</h1>
+        <p id="displayCaption" style="color: #666; margin-bottom: 20px;">আপনার সালামি বুঝে নিন 🥰</p>
+        
+        <div style="position: relative; display: inline-block;">
+            <div class="pointer"></div>
+            <div id="canvasContainer">
+                <canvas id="canvas" width="500" height="500"></canvas>
+            </div>
         </div>
-    </div>
 
-    <div class="controls">
-        <button class="spin-btn" id="spinBtn" onclick="spinWheel()">Spin Now!</button>
-        <button class="edit-btn" onclick="openEditModal()">Edit All</button>
-        <button class="share-btn" onclick="shareLink()">Share Link</button>
+        <div class="controls">
+            <button class="spin-btn" id="spinBtn" onclick="spinWheel()">Spin Now!</button>
+            <button class="share-btn" onclick="shareLink()">Share Link</button>
+            <button class="create-nav-btn" onclick="openCreateModal()">Create Mine</button>
+        </div>
     </div>
 </div>
 
 <audio id="tickSound" src="https://www.soundjay.com/buttons/button-29.mp3"></audio>
 <audio id="winSound" src="https://www.myinstants.com/media/sounds/tada.mp3"></audio>
 
-<div id="customModal" class="modal">
-    <div class="modal-content" style="text-align: center;">
+<div id="winModal" class="modal">
+    <div class="modal-content win-modal-content">
         <h2 style="color: #ff4757;">🎊 অভিনন্দন!</h2>
         <p id="modalMsg" style="font-size: 22px; font-weight: bold;"></p>
-        <button onclick="closeModal('customModal')" style="background: #27ae60; color: white; width: 100%; padding: 12px; border-radius: 12px;">OK</button>
+        <button onclick="closeModal('winModal')" style="background: #27ae60; color: white; width: 100%; padding: 12px; border-radius: 12px;">OK</button>
     </div>
 </div>
 
-<div id="editModal" class="modal">
+<div id="createModal" class="modal">
     <div class="modal-content">
-        <h3 style="text-align: center; margin-top: 0;">Settings</h3>
-        <label>Title:</label> <input type="text" id="editTitle">
-        <label>Caption:</label> <input type="text" id="editCaption">
-        <label>Amounts (Per Line):</label> <textarea id="editItems" rows="5"></textarea>
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button onclick="updateAll()" style="background: #2980b9; color: white; flex: 1;">Update</button>
-            <button onclick="closeModal('editModal')" style="background: #ccc; flex: 1;">Cancel</button>
+        <h3 style="text-align: center; margin-top: 0;">Create Your Own Wheel</h3>
+        <label>Title:</label>
+        <input type="text" id="formTitle" placeholder="Siam's Salami">
+        <label>Caption:</label>
+        <input type="text" id="formCaption" placeholder="সালামি নিয়ে যাও!">
+        <label>Amounts (Per Line):</label>
+        <textarea id="formItems" rows="4" placeholder="10&#10;20&#10;50&#10;100"></textarea>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="generateLink()" style="background: #ff4757; color: white; flex: 2;">Generate Link</button>
+            <button onclick="closeModal('createModal')" style="background: #ccc; flex: 1;">Cancel</button>
         </div>
     </div>
 </div>
@@ -105,7 +113,8 @@
     }
 
     function setDefault() {
-        options = ["5", "10", "2", "20", "50", "100", "1", "5", "10", "2"];
+        options = ["1", "5", "10", "2", "20", "50", "100", "5", "2", "1"];
+        wheelID = "default_main";
     }
 
     function startCounter() {
@@ -114,6 +123,12 @@
             count += Math.floor(Math.random() * 2) + 1;
             document.getElementById('viewCount').innerText = count.toLocaleString();
         }, 3000);
+
+        const saved = localStorage.getItem("res_" + wheelID);
+        if (saved !== null) {
+            document.getElementById('liveCountBox').innerHTML = `💸 আপনি আগেই 💸 <span>${options[parseInt(saved)]} TK</span> পেয়েছেন`;
+            document.getElementById('liveCountBox').style.background = "#2c3e50";
+        }
     }
 
     function drawWheel() {
@@ -169,30 +184,26 @@
             document.getElementById('spinBtn').disabled = false;
             winSound.play().catch(() => {});
             document.getElementById('modalMsg').innerText = "আপনি পেয়েছেন: " + options[targetIndex] + " Taka";
-            document.getElementById('customModal').style.display = 'block';
+            document.getElementById('winModal').style.display = 'block';
         }, 4000);
     }
 
-    // Edit Functionality
-    function openEditModal() {
-        document.getElementById('editTitle').value = document.getElementById('displayTitle').innerText;
-        document.getElementById('editCaption').value = document.getElementById('displayCaption').innerText;
-        document.getElementById('editItems').value = options.join("\n");
-        document.getElementById('editModal').style.display = 'block';
-    }
-
-    function updateAll() {
-        const t = document.getElementById('editTitle').value;
-        const c = document.getElementById('editCaption').value;
-        const i = document.getElementById('editItems').value.split("\n").filter(x => x.trim() !== "");
-        
-        const data = { t, c, i };
-        const encoded = btoa(JSON.stringify(data));
-        window.location.href = window.location.origin + window.location.pathname + "?d=" + encoded;
-    }
-
+    function openCreateModal() { document.getElementById('createModal').style.display = 'block'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function shareLink() { navigator.clipboard.writeText(window.location.href); alert("লিঙ্ক কপি হয়েছে!"); }
+
+    function generateLink() {
+        const t = document.getElementById('formTitle').value || "Salami Wheel";
+        const c = document.getElementById('formCaption').value || "আপনার সালামি বুঝে নিন 🥰";
+        const i = document.getElementById('formItems').value.split("\n").filter(x => x.trim() !== "");
+        if (i.length < 2) { alert("কমপক্ষে ২টি টাকার ঘর দিন!"); return; }
+        const data = { t, c, i };
+        window.location.href = window.location.origin + window.location.pathname + "?d=" + btoa(JSON.stringify(data));
+    }
+
+    function shareLink() {
+        navigator.clipboard.writeText(window.location.href);
+        alert("লিঙ্ক কপি হয়েছে! এখন বন্ধুদের পাঠান।");
+    }
     window.onload = loadData;
 </script>
 </body>
