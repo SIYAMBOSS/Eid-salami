@@ -3,69 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salami Wheel - Precision Fix</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <title>Eid Salami Wheel - Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #6c5ce7; --bg: #0f0c29; }
-        body { background: #0f0c29; color: white; font-family: 'Poppins', sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        :root { --eid-gold: #ffd700; --eid-green: #006266; --accent: #ff4757; }
+        body { background: radial-gradient(circle at center, #00332c 0%, #001a14 100%); color: white; font-family: 'Hind Siliguri', 'Poppins', sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow-x: hidden; }
         
         .container {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            padding: 30px 20px;
-            border-radius: 40px;
-            border: 1px solid rgba(255,255,255,0.1);
-            width: 90%; max-width: 400px; text-align: center;
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px);
+            padding: 35px 20px; border-radius: 40px; border: 1px solid rgba(255, 215, 0, 0.2);
+            width: 90%; max-width: 400px; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            position: relative;
         }
 
-        .live-badge { background: rgba(255, 71, 87, 0.15); color: #ff4757; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+        .eid-decor { font-size: 20px; color: var(--eid-gold); margin-bottom: 5px; }
+        h1 { font-size: 30px; margin: 5px 0; color: var(--eid-gold); text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+        p { color: #bdc3c7; font-size: 14px; margin-bottom: 20px; }
 
-        #wheel-container {
-            position: relative; width: 320px; height: 320px; margin: 20px auto;
-            border-radius: 50%; box-shadow: 0 0 50px rgba(108, 92, 231, 0.2);
-        }
-
-        /* পয়েন্টার একদম টপে ফিক্সড */
-        .pointer {
-            position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
-            width: 35px; z-index: 100; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
-        }
+        #wheel-container { position: relative; width: 320px; height: 320px; margin: 0 auto; border: 8px solid rgba(255, 215, 0, 0.1); border-radius: 50%; box-shadow: 0 0 30px rgba(0,0,0,0.3); }
+        .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 40px; z-index: 100; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); }
 
         canvas { width: 100%; height: 100%; border-radius: 50%; transition: transform 5s cubic-bezier(0.2, 0, 0.1, 1); }
 
-        .spin-btn {
-            background: linear-gradient(45deg, #6c5ce7, #fd79a8);
-            border: none; color: white; padding: 15px 0; width: 85%;
-            font-size: 18px; font-weight: bold; border-radius: 50px;
-            cursor: pointer; margin-top: 25px; box-shadow: 0 10px 20px rgba(108, 92, 231, 0.3);
-            text-transform: uppercase; letter-spacing: 1px;
-        }
+        .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; align-items: center; }
+        .spin-btn { background: linear-gradient(45deg, #ffd700, #b8860b); border: none; color: #001a14; padding: 15px 0; width: 85%; font-size: 18px; font-weight: bold; border-radius: 50px; cursor: pointer; text-transform: uppercase; box-shadow: 0 5px 15px rgba(255,215,0,0.3); transition: 0.3s; }
+        .share-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 215, 0, 0.4); color: var(--eid-gold); padding: 10px 30px; border-radius: 50px; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .spin-btn:active { transform: scale(0.96); }
 
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
-        .modal-content { background: #1e1e2f; margin: 40% auto; padding: 35px; width: 75%; max-width: 280px; border-radius: 30px; text-align: center; border: 2px solid #6c5ce7; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); }
+        .modal-content { background: #002b24; margin: 40% auto; padding: 40px 20px; width: 80%; max-width: 300px; border-radius: 30px; text-align: center; border: 2px solid var(--eid-gold); animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="live-badge">● LIVE: <span id="viewCount">3,136</span></div>
-    <h2 style="margin: 5px 0;">Salami Wheel ✨</h2>
-    <p style="color: #aaa; font-size: 13px;">আপনার সালামি বুঝে নিন</p>
+    <div class="eid-decor">🌙 ⭐</div>
+    <h1>Eid Salami ✨</h1>
+    <p>সালামি নিতে চাকাটি ঘুরান 🥰</p>
 
     <div id="wheel-container">
-        <img src="https://i.ibb.co/vY7p0YV/pointer.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/8213/8213522.png'" class="pointer">
+        <img src="https://cdn-icons-png.flaticon.com/512/8213/8213522.png" class="pointer" alt="pointer">
         <canvas id="canvas" width="600" height="600"></canvas>
     </div>
 
-    <button class="spin-btn" id="spinBtn" onclick="spinWheel()">Spin Now</button>
+    <div class="btn-group">
+        <button class="spin-btn" id="spinBtn" onclick="spinWheel()">Spin Now</button>
+        <button class="share-btn" onclick="shareLink()">🔗 Share with Friends</button>
+    </div>
 </div>
 
 <div id="winModal" class="modal">
     <div class="modal-content">
-        <h2 style="color: #fd79a8; margin: 0;">অভিনন্দন! 🎉</h2>
-        <div style="font-size: 45px; margin: 15px 0;">💰</div>
-        <p id="modalMsg" style="font-size: 26px; font-weight: bold; margin-bottom: 25px;"></p>
-        <button onclick="closeModal()" style="background: #6c5ce7; color: white; border: none; padding: 12px 0; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer;">OK</button>
+        <h2 style="color: var(--eid-gold); margin: 0;">ঈদ মোবারক! 🌙</h2>
+        <div style="font-size: 45px; margin: 15px 0;">💌</div>
+        <p style="color: #eee; margin: 0;">আপনার ঈদ সালামি:</p>
+        <p id="modalMsg" style="font-size: 32px; font-weight: bold; color: var(--eid-gold); margin: 10px 0;"></p>
+        <button onclick="closeModal()" style="background: var(--eid-gold); color: #001a14; border: none; padding: 12px 0; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 15px;">আলহামদুলিল্লাহ</button>
     </div>
 </div>
 
@@ -76,39 +70,27 @@
     const ctx = canvas.getContext('2d');
     const tickSound = document.getElementById('tickSound');
     
-    // ফিক্সড ডাটা
-    const options = ["1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.8", "1.9", "2.0"];
-    const colors = ["#4834d4", "#2d3436", "#6c5ce7", "#1e272e", "#fd79a8", "#2d3436", "#686de0", "#1e272e", "#a29bfe", "#eb4d4b"];
+    // Fixed Data with "TK"
+    const options = ["1.1 TK", "1.2 TK", "1.3 TK", "1.4 TK", "1.5 TK", "1.6 TK", "1.7 TK", "1.8 TK", "1.9 TK", "2.0 TK"];
+    const colors = ["#006266", "#1e272e", "#009432", "#2d3436", "#006266", "#1e272e", "#009432", "#2d3436", "#006266", "#1e272e"];
 
     let currentRotation = 0;
     let isSpinning = false;
 
     function drawWheel() {
-        const numSlices = options.length;
-        const arc = (2 * Math.PI) / numSlices;
-        
+        const arc = (2 * Math.PI) / options.length;
         ctx.clearRect(0,0,600,600);
         ctx.translate(300, 300);
 
-        for(let i = 0; i < numSlices; i++) {
+        for(let i = 0; i < options.length; i++) {
             const angle = i * arc;
-            
-            // Slice Drawing
             ctx.fillStyle = colors[i % colors.length];
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.arc(0, 0, 290, angle, angle + arc);
-            ctx.fill();
-            ctx.strokeStyle = "rgba(255,255,255,0.1)";
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 290, angle, angle + arc); ctx.fill();
+            ctx.strokeStyle = "rgba(255,215,0,0.2)"; ctx.lineWidth = 2; ctx.stroke();
 
-            // Text Drawing
             ctx.save();
-            ctx.fillStyle = "white";
-            ctx.font = "bold 28px Arial";
-            ctx.rotate(angle + arc/2);
-            ctx.textAlign = "right";
-            ctx.fillText(options[i], 240, 10);
+            ctx.fillStyle = "#ffd700"; ctx.font = "bold 24px Arial"; ctx.rotate(angle + arc/2);
+            ctx.textAlign = "right"; ctx.fillText(options[i], 250, 10);
             ctx.restore();
         }
     }
@@ -118,34 +100,22 @@
         isSpinning = true;
         document.getElementById('spinBtn').disabled = true;
 
-        const numSlices = options.length;
-        const sliceDeg = 360 / numSlices;
-        
-        // Randomly pick winning index
-        const winIdx = Math.floor(Math.random() * numSlices);
-        
-        /* Precision Logic:
-           Point 0deg is at 3 o'clock. Pointer is at 12 o'clock (270deg).
-           Calculation ensures the winIdx lands exactly under the pointer.
-        */
+        const sliceDeg = 360 / options.length;
+        const winIdx = Math.floor(Math.random() * options.length);
         const stopDeg = (360 - (winIdx * sliceDeg)) - (sliceDeg / 2);
-        const totalSpins = 360 * 10; // 10 rotations
         
-        currentRotation += totalSpins + stopDeg + (360 - (currentRotation % 360));
+        currentRotation += (360 * 10) + stopDeg + (360 - (currentRotation % 360));
         canvas.style.transform = `rotate(${currentRotation + 270}deg)`; 
 
-        // Sound Logic
         let lastIdx = -1;
         const ticker = setInterval(() => {
             const style = window.getComputedStyle(canvas);
             const matrix = new WebKitCSSMatrix(style.transform);
             const angle = Math.atan2(matrix.m12, matrix.m11) * (180 / Math.PI);
-            const normAngle = (angle < 0) ? angle + 360 : angle;
-            const currentIdx = Math.floor(((360 - normAngle + 270) % 360) / sliceDeg) % numSlices;
-            
+            const norm = (angle < 0) ? angle + 360 : angle;
+            const currentIdx = Math.floor(((360 - norm + 270) % 360) / sliceDeg) % options.length;
             if(currentIdx !== lastIdx) {
-                tickSound.currentTime = 0;
-                tickSound.play().catch(()=>{});
+                tickSound.currentTime = 0; tickSound.play().catch(()=>{});
                 lastIdx = currentIdx;
             }
         }, 60);
@@ -154,14 +124,21 @@
             clearInterval(ticker);
             isSpinning = false;
             document.getElementById('spinBtn').disabled = false;
-            document.getElementById('modalMsg').innerText = "আপনি " + options[winIdx] + " পেয়েছেন";
+            document.getElementById('modalMsg').innerText = options[winIdx];
             document.getElementById('winModal').style.display = 'block';
         }, 5100);
     }
 
     function closeModal() { document.getElementById('winModal').style.display = 'none'; }
+    function shareLink() {
+        if (navigator.share) {
+            navigator.share({ title: 'Eid Salami Wheel', url: window.location.href });
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            alert("লিঙ্ক কপি হয়েছে!");
+        }
+    }
     
-    // Initial Draw
     drawWheel();
 </script>
 </body>
