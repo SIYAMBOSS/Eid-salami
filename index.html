@@ -8,40 +8,42 @@
         body { text-align: center; font-family: 'Arial', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        /* ব্যাকগ্রাউন্ড ইমেজের জন্য স্টাইল */
         #canvasContainer { 
             position: relative; 
             display: inline-block; 
             border-radius: 50%; 
-            overflow: hidden;
-            width: 400px;
-            height: 400px;
-            background-image: url('https://i.ibb.co/3mN98Cg/lantern-bg.jpg'); /* এখানে আপনার ছবি থাকবে */
+            width: 350px;
+            height: 350px;
+            background-image: url('https://i.ibb.co/3mN98Cg/lantern-bg.jpg'); 
             background-size: cover;
             background-position: center;
             border: 8px solid #fff;
-            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
         }
 
         #canvas { width: 100%; height: 100%; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
         
+        .live-count { background: #ff7675; color: white; padding: 5px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+        
         .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
-        button { padding: 12px 20px; font-size: 16px; cursor: pointer; border: none; border-radius: 8px; transition: 0.3s; font-weight: bold; }
-        .spin-btn { background: #ff4757; color: white; width: 100%; margin-bottom: 10px; }
+        button { padding: 12px 20px; font-size: 16px; cursor: pointer; border: none; border-radius: 10px; transition: 0.3s; font-weight: bold; }
+        .spin-btn { background: #ff4757; color: white; width: 100%; margin-bottom: 5px; }
         .share-btn { background: #2ed573; color: white; flex: 1; }
         .edit-btn { background: #1e90ff; color: white; flex: 1; }
         
-        .pointer { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #ff4757; position: absolute; left: 50%; transform: translateX(-50%); z-index: 20; top: -5px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
+        .pointer { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #333; position: absolute; left: 50%; transform: translateX(-50%); z-index: 20; top: -5px; }
         
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); }
-        .modal-content { background: white; margin: 15% auto; padding: 25px; width: 85%; max-width: 350px; border-radius: 15px; text-align: left; }
-        textarea { width: 100%; height: 100px; margin: 10px 0; padding: 10px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; resize: none; }
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
+        .modal-content { background: white; margin: 20% auto; padding: 25px; width: 85%; max-width: 350px; border-radius: 15px; text-align: left; }
+        textarea { width: 100%; height: 120px; margin: 10px 0; padding: 10px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; resize: none; font-size: 16px; }
         input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <div class="live-count">🔴 Live Watching: <span id="viewCount">...</span></div>
+    
     <h1 id="displayTitle">Salami Wheel..!! 🖤</h1>
     <p id="displayCaption">আপনার সালামি বুঝে নিন 🥰</p>
     
@@ -74,7 +76,7 @@
         <input type="text" id="editTitle">
         <label>ক্যাপশন:</label>
         <input type="text" id="editCaption">
-        <label>সালামি (প্রতি লাইনে একটি সংখ্যা):</label>
+        <label>সালামি লিস্ট (শুধু সংখ্যা):</label>
         <textarea id="salamiItems"></textarea>
         <div style="display: flex; gap: 10px;">
             <button onclick="updateAll()" style="background: #1e90ff; color: white; flex: 1;">Update</button>
@@ -86,26 +88,32 @@
 <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    // কালারগুলোতে হালকা ট্রান্সপারেন্সি দেওয়া হয়েছে যাতে ব্যাকগ্রাউন্ডের ছবি কিছুটা বোঝা যায়
-    const colors = ["rgba(255, 89, 94, 0.7)", "rgba(255, 202, 58, 0.7)", "rgba(138, 201, 38, 0.7)", "rgba(25, 130, 196, 0.7)", "rgba(106, 76, 147, 0.7)", "rgba(247, 37, 133, 0.7)", "rgba(76, 201, 240, 0.7)"];
+    const colors = ["rgba(255, 89, 94, 0.7)", "rgba(255, 202, 58, 0.7)", "rgba(138, 201, 38, 0.7)", "rgba(25, 130, 196, 0.7)", "rgba(106, 76, 147, 0.7)", "rgba(247, 37, 133, 0.7)"];
     
     let options = [];
-    let currentTitle = "";
-    let currentCaption = "";
-    let startAngle = 0;
     let isSpinning = false;
+
+    // ১. লাইভ ওয়াচিং সিমুলেশন
+    function startCounter() {
+        document.getElementById('viewCount').innerText = Math.floor(Math.random() * 20) + 5;
+    }
 
     function loadData() {
         const urlParams = new URLSearchParams(window.location.search);
         const itemsData = urlParams.get('items');
-        currentTitle = urlParams.get('t') || "Salami Wheel..!! 🖤";
-        currentCaption = urlParams.get('c') || "আপনার সালামি বুঝে নিন 🥰";
         
-        options = itemsData ? itemsData.split(',').map(decodeURIComponent) : ["10", "50", "100", "5", "20", "500", "10", "1000"];
+        // ২. ডিফল্ট ১-১০ টাকা পর্যন্ত, কিন্তু লিঙ্ক থাকলে সেটা লোড হবে
+        if (itemsData) {
+            options = itemsData.split(',').map(decodeURIComponent);
+        } else {
+            options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+        }
         
-        document.getElementById('displayTitle').innerText = currentTitle;
-        document.getElementById('displayCaption').innerText = currentCaption;
+        document.getElementById('displayTitle').innerText = urlParams.get('t') || "Salami Wheel..!! 🖤";
+        document.getElementById('displayCaption').innerText = urlParams.get('c') || "আপনার সালামি বুঝে নিন 🥰";
+        
         drawWheel();
+        startCounter();
     }
 
     function drawWheel() {
@@ -114,21 +122,21 @@
         ctx.clearRect(0,0,500,500);
 
         for(let i = 0; i < numOptions; i++) {
-            const angle = startAngle + i * arc;
+            const angle = i * arc;
             ctx.fillStyle = colors[i % colors.length];
             ctx.beginPath();
             ctx.moveTo(250, 250);
             ctx.arc(250, 250, 250, angle, angle + arc, false);
             ctx.fill();
 
-            // লম্বালম্বি টেক্সট
+            // ৩. লম্বালম্বি লেখা (Radial Text)
             ctx.save();
             ctx.fillStyle = "white";
-            ctx.font = "bold 18px Arial";
+            ctx.font = "bold 20px Arial";
             ctx.translate(250, 250);
             ctx.rotate(angle + arc / 2);
-            const text = options[i] + " Taka";
-            ctx.fillText(text, 100, 5); 
+            const text = options[i] + " TK";
+            ctx.fillText(text, 120, 10); 
             ctx.restore();
         }
     }
@@ -147,7 +155,7 @@
             const actualDeg = extraDegrees % 360;
             const index = Math.floor((360 - (actualDeg - 90) % 360) % 360 / (360 / options.length));
             
-            showPopup("🎊 ঈদ মোবারক!", "আপনি পেয়েছেন: " + options[index] + " Taka");
+            showPopup("🎊 অভিনন্দন!", "আপনি পেয়েছেন: " + options[index] + " Taka");
             canvas.style.transition = 'none';
             canvas.style.transform = `rotate(${actualDeg}deg)`;
             setTimeout(() => canvas.style.transition = 'transform 4s cubic-bezier(0.15, 0, 0.15, 1)', 50);
@@ -155,16 +163,13 @@
     }
 
     function updateAll() {
-        const newTitle = document.getElementById('editTitle').value;
-        const newCaption = document.getElementById('editCaption').value;
-        const newOptions = document.getElementById('salamiItems').value.split("\n").map(s => s.trim()).filter(s => s !== "");
+        const title = document.getElementById('editTitle').value;
+        const cap = document.getElementById('editCaption').value;
+        const list = document.getElementById('salamiItems').value.split("\n").filter(s => s.trim() !== "");
         
-        if(newOptions.length < 2) return alert("কমপক্ষে ২টি ঘর দিন!");
-
-        const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?items=${newOptions.map(encodeURIComponent).join(',')}&t=${encodeURIComponent(newTitle)}&c=${encodeURIComponent(newCaption)}`;
-        window.history.pushState({path:newUrl},'',newUrl);
-        
-        location.reload(); // ডাটা আপডেট করে পেজ রিফ্রেশ
+        // ৪. নতুন ডাটা দিয়ে লিঙ্ক তৈরি করা
+        const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?items=${list.map(encodeURIComponent).join(',')}&t=${encodeURIComponent(title)}&c=${encodeURIComponent(cap)}`;
+        window.location.href = newUrl;
     }
 
     function showPopup(t, m) {
@@ -174,13 +179,14 @@
     }
 
     function shareLink() {
-        navigator.clipboard.writeText(window.location.href);
-        showPopup("লিঙ্ক কপি হয়েছে!", "বন্ধুদের পাঠিয়ে দিন।");
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            showPopup("Link Copied!", "আপনার ইউনিক লিঙ্কটি বন্ধুদের পাঠান।");
+        });
     }
 
     function openEditModal() {
-        document.getElementById('editTitle').value = currentTitle;
-        document.getElementById('editCaption').value = currentCaption;
+        document.getElementById('editTitle').value = document.getElementById('displayTitle').innerText;
+        document.getElementById('editCaption').value = document.getElementById('displayCaption').innerText;
         document.getElementById('salamiItems').value = options.join("\n");
         document.getElementById('editModal').style.display = 'block';
     }
